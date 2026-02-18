@@ -122,7 +122,8 @@ class CoreEngine {
             status: 'pending',
             timestamp: new Date().toISOString(),
             assignedTo: null,
-            retryCount: 0
+            retryCount: 0,
+            failedAgents: []
         };
 
         this.taskQueue.push(task);
@@ -138,13 +139,21 @@ class CoreEngine {
     }
 
     /**
+     * Alias for processQueue for backward compatibility
+     */
+    async assignTasks() {
+        return this.processQueue();
+    }
+
+    /**
      * Dequeues and processes the next available task
      */
     async processQueue() {
         const nextTask = this.taskQueue.find(t => t.status === 'pending');
         if (!nextTask) return;
 
-        const agentId = this.findBestAgentForTask(nextTask);
+        // Ensure we don't pick an agent that already failed/rejected this task
+        const agentId = this.findBestAgentForTask(nextTask, nextTask.failedAgents || []);
         if (!agentId) return;
 
         // Transition task to processing state
@@ -159,9 +168,48 @@ class CoreEngine {
 
         try {
             const result = await this.dispatchToAgent(this.agents[agentId], nextTask);
+
+            // Logic for dynamic reassignment if confidence is too low
+            const CONFIDENCE_THRESHOLD = 0.6;
+            if (result.confidenceScore < CONFIDENCE_THRESHOLD) {
+                logger.warn('LOW_CONFIDENCE_REASSIGNMENT', `Agent ${agentId} reported low confidence (${result.confidenceScore}) for task ${nextTask.id}. Reassigning...`, {
+                    taskId: nextTask.id,
+                    agentId,
+                    confidenceScore: result.confidenceScore
+                });
+
+                this.handleTaskReassignment(nextTask, agentId, `Low confidence score: ${result.confidenceScore}`);
+                return;
+            }
+
             this.logOutput(nextTask.id, agentId, result);
         } catch (error) {
             this.handleTaskFailure(nextTask, agentId, error);
+        }
+    }
+
+    /**
+     * Handles task reassignment logic for low confidence or non-fatal issues
+     * @param {Object} task 
+     * @param {string} agentId 
+     * @param {string} reason 
+     */
+    handleTaskReassignment(task, agentId, reason) {
+        if (this.agents[agentId]) {
+            this.agents[agentId].status = 'idle';
+        }
+
+        task.retryCount += 1;
+        task.failedAgents = task.failedAgents || [];
+        task.failedAgents.push(agentId);
+
+        if (task.retryCount < 3) {
+            task.status = 'pending';
+            task.assignedTo = null;
+            logger.info('TASK_REQUEUED', `Task ${task.id} returned to queue for next-best agent. Reason: ${reason}`);
+        } else {
+            task.status = 'failed';
+            logger.error('TASK_ABORTED', `Task ${task.id} aborted after multiple reassignment attempts. Reason: ${reason}`);
         }
     }
 
@@ -172,12 +220,9 @@ class CoreEngine {
      * @returns {Promise<Object>} The structured output
      */
     async dispatchToAgent(agent, task) {
-        // In a production environment, this would call the agent's API via fetch/axios
-        // Here we simulate the response structure required by the system.
-
         return new Promise((resolve, reject) => {
             // Simulated network latency
-            const timeout = setTimeout(() => {
+            setTimeout(() => {
                 // Random failure simulation for error handling testing
                 if (Math.random() < 0.1) {
                     reject(new Error('Agent API Connection Timeout'));
@@ -199,20 +244,76 @@ class CoreEngine {
     }
 
     /**
-     * Finds the most suitable agent for a task
+     * Finds the most suitable agent for a task based on calculated compatibility scores.
      * @param {Object} task 
+     * @param {string[]} excludeIds List of agent IDs to skip
      * @returns {string|null} Agent ID or null
      */
-    findBestAgentForTask(task) {
-        const availableAgents = Object.values(this.agents).filter(a => a.status === 'idle');
-        if (availableAgents.length === 0) return null;
-
-        const matchedAgents = availableAgents.filter(agent =>
-            agent.domainLabels.includes(task.domainLabel)
+    findBestAgentForTask(task, excludeIds = []) {
+        const availableAgents = Object.values(this.agents).filter(a =>
+            a.status === 'idle' && !excludeIds.includes(a.id)
         );
 
-        const candidates = matchedAgents.length > 0 ? matchedAgents : availableAgents;
-        return candidates[0].id; // Simple FIFO selection for now
+        if (availableAgents.length === 0) return null;
+
+        const scoredAgents = availableAgents.map(agent => ({
+            id: agent.id,
+            score: this.calculateCompatibility(agent, task)
+        }));
+
+        // Sort by score descending
+        scoredAgents.sort((a, b) => b.score - a.score);
+
+        const bestMatch = scoredAgents[0];
+
+        // Threshold for minimum compatibility (optional, e.g., 0.2)
+        if (bestMatch.score < 0.2) {
+            logger.warn('LOW_COMPATIBILITY', `No agent found with sufficient compatibility for task ${task.id}`, {
+                taskId: task.id,
+                bestScore: bestMatch.score
+            });
+            return null;
+        }
+
+        return bestMatch.id;
+    }
+
+    /**
+     * Calculates a compatibility score (0.0 to 1.0) between an agent and a task.
+     * Considers domain, complexity, skill vectors, historical success, and priority.
+     * @param {Object} agent 
+     * @param {Object} task 
+     * @returns {number} Normalized score
+     */
+    calculateCompatibility(agent, task) {
+        let score = 0;
+
+        // 1. Domain Match (40%)
+        const domainMatch = agent.domainLabels.includes(task.domainLabel) ? 1.0 : 0.0;
+        score += domainMatch * 0.4;
+
+        // 2. Skill-to-Complexity Fit (30%)
+        const skillValues = Object.values(agent.skillScores);
+        const avgSkill = skillValues.reduce((a, b) => a + b, 0) / (skillValues.length || 1);
+        const specificSkill = agent.skillScores[task.domainLabel] || (avgSkill * 0.7);
+
+        const normalizedSkill = specificSkill / 10;
+        const normalizedComplexity = task.complexityScore / 10;
+
+        const skillScore = normalizedSkill >= normalizedComplexity ? 1.0 : (normalizedSkill / normalizedComplexity);
+        score += skillScore * 0.3;
+
+        // 3. Historical Success Rate (20%)
+        const successRate = agent.performanceData.successRate || 0.5;
+        score += successRate * 0.2;
+
+        // 4. Priority & Reliability Buffer (10%)
+        const experienceFactor = Math.min(agent.performanceData.tasksCompleted / 50, 1.0);
+        const priorityWeight = (task.priority || 1) / 10;
+        const reliabilityScore = (experienceFactor * 0.5) + (priorityWeight * 0.5);
+        score += reliabilityScore * 0.1;
+
+        return parseFloat(score.toFixed(4));
     }
 
     /**
@@ -224,7 +325,6 @@ class CoreEngine {
     logOutput(taskId, agentId, output) {
         const timestamp = new Date().toISOString();
 
-        // Final structured record as per requirements
         this.taskOutputs[taskId] = {
             taskId,
             agentId,
@@ -266,6 +366,8 @@ class CoreEngine {
         }
 
         task.retryCount += 1;
+        task.failedAgents = task.failedAgents || [];
+        task.failedAgents.push(agentId);
 
         if (task.retryCount < 3) {
             logger.info('TASK_REASSIGNMENT', `Flagging task ${task.id} for reassignment (Retry ${task.retryCount}/3)`);
