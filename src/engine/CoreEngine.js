@@ -123,7 +123,10 @@ class CoreEngine {
             timestamp: new Date().toISOString(),
             assignedTo: null,
             retryCount: 0,
-            failedAgents: []
+            failedAgents: [],
+            dependencies: taskData.dependencies || [],
+            subtasks: [], // Store IDs of subtasks
+            parentTaskId: taskData.parentTaskId || null
         };
 
         this.taskQueue.push(task);
@@ -149,7 +152,24 @@ class CoreEngine {
      * Dequeues and processes the next available task
      */
     async processQueue() {
-        const nextTask = this.taskQueue.find(t => t.status === 'pending');
+        const nextTask = this.taskQueue.find(t => {
+            if (t.status !== 'pending') return false;
+
+            // If it has initialized subtasks, it's a parent waiting for them
+            if (t.subtasks && t.subtasks.length > 0) return false;
+
+            // Dependency check: all dependency tasks must be completed
+            if (t.dependencies && t.dependencies.length > 0) {
+                const allDepsMet = t.dependencies.every(depId => {
+                    const depTask = this.taskQueue.find(task => task.id === depId);
+                    return depTask && depTask.status === 'completed';
+                });
+                if (!allDepsMet) return false;
+            }
+
+            return true;
+        });
+
         if (!nextTask) return;
 
         // Ensure we don't pick an agent that already failed/rejected this task
@@ -186,6 +206,58 @@ class CoreEngine {
         } catch (error) {
             this.handleTaskFailure(nextTask, agentId, error);
         }
+    }
+
+    /**
+     * Splits a complex task into multiple subtasks with dependencies.
+     * @param {string} parentTaskId The ID of the task to decompose
+     * @param {Array<Object>} subtaskSpecs Definitions of the subtasks
+     */
+    decomposeTask(parentTaskId, subtaskSpecs) {
+        const parentTask = this.taskQueue.find(t => t.id === parentTaskId);
+        if (!parentTask) {
+            logger.error('DECOMPOSITION_FAILED', `Parent task ${parentTaskId} not found`);
+            throw new Error(`Parent task ${parentTaskId} not found`);
+        }
+
+        parentTask.status = 'waiting_for_subtasks';
+
+        logger.info('TASK_DECOMPOSITION', `Decomposing complex task ${parentTaskId} into ${subtaskSpecs.length} subtasks`, {
+            parentTaskId,
+            subtaskCount: subtaskSpecs.length
+        });
+
+        for (const spec of subtaskSpecs) {
+            const subtaskId = `subtask_${uuidv4()}`;
+            const subtask = {
+                ...spec,
+                id: subtaskId,
+                taskID: subtaskId,
+                parentTaskId: parentTaskId,
+                status: 'pending',
+                dependencies: spec.dependencies || [],
+                subtasks: [],
+                timestamp: new Date().toISOString(),
+                assignedTo: null,
+                retryCount: 0,
+                failedAgents: []
+            };
+
+            this.taskQueue.push(subtask);
+            parentTask.subtasks.push(subtaskId);
+
+            logger.info('SUBTASK_CREATED', `Subtask ${subtaskId} created for parent ${parentTaskId}`, {
+                subtaskId,
+                parentTaskId,
+                dependencies: subtask.dependencies,
+                domainLabel: subtask.domainLabel
+            });
+        }
+
+        // Re-sort queue to maintain priority after adding subtasks
+        this.taskQueue.sort((a, b) => (b.priority || 1) - (a.priority || 1));
+
+        return parentTask.subtasks;
     }
 
     /**
@@ -342,13 +414,57 @@ class CoreEngine {
                 this.agents[agentId].status = 'idle';
                 this.updateAgentPerformance(agentId, true, output.predictedImpact);
             }
+
+            // If this was a subtask, notify the parent and check for aggregation
+            if (task.parentTaskId) {
+                this.checkAndAggregateParent(task.parentTaskId);
+            }
         }
 
         logger.info('TASK_COMPLETED', `Task ${taskId} completed and logged`, {
             taskId,
             agentId,
-            confidence: output.confidenceScore
+            confidence: output.confidenceScore,
+            isSubtask: !!task.parentTaskId,
+            parentTaskId: task.parentTaskId || null
         });
+    }
+
+    /**
+     * Checks if all subtasks of a parent are completed and aggregates results.
+     * @param {string} parentTaskId 
+     */
+    checkAndAggregateParent(parentTaskId) {
+        const parentTask = this.taskQueue.find(t => t.id === parentTaskId);
+        if (!parentTask || parentTask.status === 'completed') return;
+
+        const subtasks = this.taskQueue.filter(t => t.parentTaskId === parentTaskId);
+        const allCompleted = subtasks.length > 0 && subtasks.every(s => s.status === 'completed');
+
+        if (allCompleted) {
+            logger.info('SUBTASKS_COMPLETE', `All subtasks for parent ${parentTaskId} finished. Aggregating results.`, {
+                parentTaskId,
+                subtaskCount: subtasks.length
+            });
+
+            const subtaskResults = subtasks.map(s => this.taskOutputs[s.id]).filter(Boolean);
+
+            // Result Aggregation Logic
+            const aggregatedResult = {
+                resultData: subtaskResults.map(r => `[Agent ${r.agentId}]: ${r.resultData}`).join('\n---\n'),
+                confidenceScore: parseFloat((subtaskResults.reduce((acc, r) => acc + r.confidenceScore, 0) / subtaskResults.length).toFixed(2)),
+                predictedImpact: parseFloat((subtaskResults.reduce((acc, r) => acc + (r.predictedImpact || 0), 0) / subtaskResults.length).toFixed(1)),
+                executionTime: subtaskResults.reduce((acc, r) => acc + (r.executionTime || 0), 0)
+            };
+
+            // Log the parent task as completed with aggregated data
+            this.logOutput(parentTaskId, 'AGGREGATOR_SYSTEM', aggregatedResult);
+
+            logger.info('PARENT_TASK_FINALIZED', `Aggregated results for complex task ${parentTaskId}`, {
+                parentTaskId,
+                aggregatedImpact: aggregatedResult.predictedImpact
+            });
+        }
     }
 
     /**

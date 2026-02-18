@@ -30,6 +30,14 @@ export function validateTask(task) {
         errors.push('Invalid "priority": must be a number.');
     }
 
+    if (task.dependencies !== undefined && !Array.isArray(task.dependencies)) {
+        errors.push('Invalid "dependencies": must be an array of task IDs.');
+    }
+
+    if (task.subtasks !== undefined && !Array.isArray(task.subtasks)) {
+        errors.push('Invalid "subtasks": must be an array of subtask definitions.');
+    }
+
     return {
         isValid: errors.length === 0,
         errors
