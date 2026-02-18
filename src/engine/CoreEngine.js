@@ -1,5 +1,6 @@
 import logger from '../logger/Logger.js';
 import { v4 as uuidv4 } from 'uuid';
+import { validateTask } from './TaskValidator.js';
 
 /**
  * Lightweight Orchestration Core (LOC) Engine
@@ -60,25 +61,36 @@ class CoreEngine {
      * Submits a new task to the queue
      * @param {Object} taskData Details of the task
      * @returns {string} The submitted Task ID
+     * @throws {Error} if task validation fails
      */
     submitTask(taskData) {
+        const validation = validateTask(taskData);
+        if (!validation.isValid) {
+            logger.error('TASK_SUBMISSION_FAILED', 'Task validation failed', { errors: validation.errors, taskData });
+            throw new Error(`Invalid Task: ${validation.errors.join(' ')}`);
+        }
+
         const taskId = `task_${uuidv4()}`;
         const task = {
-            id: taskId,
+            ...taskData,
+            taskID: taskId,           // Unique ID as per schema
+            id: taskId,               // Internal ID reference
             status: 'pending',
-            priority: taskData.priority || 1,
-            requirements: taskData.requirements || {},
-            payload: taskData.payload || {},
             timestamp: new Date().toISOString(),
-            assignedTo: null,
-            ...taskData
+            assignedTo: null
         };
 
         this.taskQueue.push(task);
-        // Sort by priority (higher first)
-        this.taskQueue.sort((a, b) => b.priority - a.priority);
+        // Sort by priority (higher first, default to 1)
+        this.taskQueue.sort((a, b) => (b.priority || 1) - (a.priority || 1));
 
-        logger.info('TASK_SUBMITTED', `Task ${taskId} submitted to queue`, { taskId, priority: task.priority });
+        logger.info('TASK_SUBMITTED', `Task ${taskId} submitted to queue`, {
+            taskId,
+            domainLabel: task.domainLabel,
+            complexityScore: task.complexityScore,
+            priority: task.priority || 1
+        });
+
         return taskId;
     }
 
@@ -115,16 +127,14 @@ class CoreEngine {
 
         if (availableAgents.length === 0) return null;
 
-        // Basic matching logic: check domain labels
-        // We'll expand this later with predicted success and impact
+        // Matching logic: check if the task's domainLabel is supported by the agent
         const matchedAgents = availableAgents.filter(agent =>
-            agent.domainLabels.some(label => task.requirements?.domains?.includes(label))
+            agent.domainLabels.includes(task.domainLabel)
         );
 
         const candidates = matchedAgents.length > 0 ? matchedAgents : availableAgents;
 
-        // Pick the one with the highest skill score for the relevant domain if applicable
-        // Otherwise pick the first available
+        // Pick the first available candidate (could be refined with skill scores later)
         return candidates[0].id;
     }
 

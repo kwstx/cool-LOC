@@ -19,8 +19,9 @@ const logicAgentId = engine.registerAgent({
 
 // 2. Submit Tasks
 const taskId = engine.submitTask({
-    requirements: { domains: ['research'] },
-    payload: { query: 'Analyze market trends for AI agents' },
+    description: 'Analyze market trends for AI agents',
+    domainLabel: 'research',
+    complexityScore: 4,
     priority: 5
 });
 
