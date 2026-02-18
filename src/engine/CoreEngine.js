@@ -1,6 +1,7 @@
 import logger from '../logger/Logger.js';
 import { v4 as uuidv4 } from 'uuid';
 import { validateTask } from './TaskValidator.js';
+import { validateAgent } from './AgentValidator.js';
 
 /**
  * Lightweight Orchestration Core (LOC) Engine
@@ -67,24 +68,37 @@ class CoreEngine {
      * @returns {string} The registered Agent ID
      */
     registerAgent(metadata) {
-        const agentId = metadata.id || `agent_${Object.keys(this.agents).length + 1}`;
+        const validation = validateAgent(metadata, this.agents);
+        if (!validation.isValid) {
+            logger.error('AGENT_REGISTRATION_FAILED', 'Agent validation failed', { errors: validation.errors, metadata });
+            throw new Error(`Invalid Agent Registration: ${validation.errors.join(' ')}`);
+        }
+
+        const agentId = metadata.id || `agent_${uuidv4().split('-')[0]}`;
 
         this.agents[agentId] = {
             id: agentId,
-            domainLabels: metadata.domainLabels || [],
-            skillScores: metadata.skillScores || {},
-            apiEndpoint: metadata.apiEndpoint || '',
-            performanceData: metadata.performanceData || {
-                tasksCompleted: 0,
-                successRate: 0,
-                averageImpact: 0,
-                lastActive: null
+            domainLabels: metadata.domainLabels,
+            skillScores: metadata.skillScores,
+            apiEndpoint: metadata.apiEndpoint,
+            performanceData: {
+                tasksCompleted: metadata.performanceData.tasksCompleted || 0,
+                successRate: metadata.performanceData.successRate || 0,
+                averageImpact: metadata.performanceData.averageImpact || 0,
+                lastActive: metadata.performanceData.lastActive || null,
+                ...metadata.performanceData
             },
             status: 'idle',
-            ...metadata
+            registeredAt: new Date().toISOString()
         };
 
-        logger.info('AGENT_REGISTERED', `Agent ${agentId} registered`, { agentId, domainLabels: this.agents[agentId].domainLabels });
+        logger.info('AGENT_REGISTERED', `Agent ${agentId} registered with domains: ${this.agents[agentId].domainLabels.join(', ')}`, {
+            agentId,
+            domainLabels: this.agents[agentId].domainLabels,
+            apiEndpoint: this.agents[agentId].apiEndpoint,
+            skillScores: this.agents[agentId].skillScores
+        });
+
         return agentId;
     }
 
