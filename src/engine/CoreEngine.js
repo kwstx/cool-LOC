@@ -28,6 +28,18 @@ class CoreEngine {
         this.taskOutputs = {};
 
         /**
+         * Collaboration logs for performance analysis
+         * @type {Array.<Object>}
+         */
+        this.collaborationLogs = [];
+
+        /**
+         * Shared data space for tasks to communicate
+         * @type {Object.<string, Object>}
+         */
+        this.collaborationSpace = {};
+
+        /**
          * Reference to the execution loop timer
          */
         this.executionTimer = null;
@@ -431,6 +443,74 @@ class CoreEngine {
     }
 
     /**
+     * Internal protocol for agent communication during task execution.
+     * Allows sharing results, requesting input, and synchronizing progress.
+     * @param {string} taskId Task enacting the collaboration
+     * @param {string} agentId Agent performing the action
+     * @param {string} action 'SHARE_RESULT' | 'REQUEST_INPUT' | 'SYNC_PROGRESS'
+     * @param {Object} payload Data for the collaboration
+     */
+    async collaborate(taskId, agentId, action, payload) {
+        const task = this.taskQueue.find(t => t.id === taskId);
+        if (!task) throw new Error(`Task ${taskId} not found`);
+
+        const contextId = task.parentTaskId || taskId;
+
+        if (!this.collaborationSpace[contextId]) {
+            this.collaborationSpace[contextId] = {
+                sharedResults: {},
+                requests: [],
+                syncPoints: {}
+            };
+        }
+
+        const context = this.collaborationSpace[contextId];
+
+        // Log the interaction
+        this.collaborationLogs.push({
+            timestamp: new Date().toISOString(),
+            taskId,
+            agentId,
+            action,
+            payload
+        });
+
+        logger.info('AGENT_COLLABORATION', `Agent ${agentId} initiated ${action} for task ${taskId}`, {
+            action,
+            taskId,
+            contextId
+        });
+
+        switch (action) {
+            case 'SHARE_RESULT':
+                context.sharedResults[taskId] = {
+                    agentId,
+                    data: payload,
+                    timestamp: new Date().toISOString()
+                };
+                break;
+
+            case 'REQUEST_INPUT':
+                context.requests.push({ from: agentId, taskId, payload, timestamp: new Date().toISOString() });
+                // Conflict resolution: If multiple agents request same data, prioritize existing shared results
+                if (payload.targetTaskId && context.sharedResults[payload.targetTaskId]) {
+                    return context.sharedResults[payload.targetTaskId].data;
+                }
+                break;
+
+            case 'SYNC_PROGRESS':
+                // Update shared progress state
+                context.syncPoints[taskId] = payload;
+                break;
+
+            default:
+                logger.warn('UNKNOWN_COLLABORATION_ACTION', `Action ${action} is not supported`);
+        }
+
+        return null;
+    }
+
+    /**
      * Checks if all subtasks of a parent are completed and aggregates results.
      * @param {string} parentTaskId 
      */
@@ -448,10 +528,21 @@ class CoreEngine {
             });
 
             const subtaskResults = subtasks.map(s => this.taskOutputs[s.id]).filter(Boolean);
+            const collabContext = this.collaborationSpace[parentTaskId];
 
             // Result Aggregation Logic
+            let aggregatedData = subtaskResults.map(r => `[Agent ${r.agentId}]: ${r.resultData}`).join('\n---\n');
+
+            // Include collaborative data in the final result
+            if (collabContext && Object.keys(collabContext.sharedResults).length > 0) {
+                aggregatedData += '\n\n=== Collaborative Contributions ===\n';
+                for (const [taskId, res] of Object.entries(collabContext.sharedResults)) {
+                    aggregatedData += `[Task ${taskId} by Agent ${res.agentId}]: ${JSON.stringify(res.data)}\n`;
+                }
+            }
+
             const aggregatedResult = {
-                resultData: subtaskResults.map(r => `[Agent ${r.agentId}]: ${r.resultData}`).join('\n---\n'),
+                resultData: aggregatedData,
                 confidenceScore: parseFloat((subtaskResults.reduce((acc, r) => acc + r.confidenceScore, 0) / subtaskResults.length).toFixed(2)),
                 predictedImpact: parseFloat((subtaskResults.reduce((acc, r) => acc + (r.predictedImpact || 0), 0) / subtaskResults.length).toFixed(1)),
                 executionTime: subtaskResults.reduce((acc, r) => acc + (r.executionTime || 0), 0)
