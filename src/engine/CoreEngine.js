@@ -389,6 +389,110 @@ class CoreEngine {
     }
 
     /**
+     * Updates the priority of an existing task and re-sorts the queue if necessary.
+     * @param {string} taskId 
+     * @param {number} newPriority 
+     */
+    updateTaskPriority(taskId, newPriority) {
+        const task = this.taskQueue.find(t => t.id === taskId);
+        if (!task) {
+            logger.error('PRIORITY_UPDATE_FAILED', `Task ${taskId} not found`);
+            return;
+        }
+
+        const oldPriority = task.priority;
+        task.priority = newPriority;
+
+        // Re-sort queue
+        this.taskQueue.sort((a, b) => {
+            const priorityDiff = (b.priority || 1) - (a.priority || 1);
+            if (priorityDiff !== 0) return priorityDiff;
+            return (b.predictedImpact || 0) - (a.predictedImpact || 0);
+        });
+
+        logger.info('TASK_PRIORITY_UPDATED', `Task ${taskId} priority changed from ${oldPriority} to ${newPriority}`, { taskId, oldPriority, newPriority });
+    }
+
+    /**
+     * Dynamically adds a dependency to a task mid-execution.
+     * @param {string} taskId 
+     * @param {string} dependencyId 
+     */
+    addTaskDependency(taskId, dependencyId) {
+        const task = this.taskQueue.find(t => t.id === taskId);
+        if (!task) {
+            logger.error('DEPENDENCY_ADD_FAILED', `Task ${taskId} not found`);
+            return;
+        }
+
+        if (!task.dependencies) task.dependencies = [];
+        if (!task.dependencies.includes(dependencyId)) {
+            task.dependencies.push(dependencyId);
+            logger.info('TASK_DEPENDENCY_ADDED', `Task ${taskId} now depends on ${dependencyId}`, { taskId, dependencyId });
+        }
+    }
+
+    /**
+     * Merges multiple existing subtasks into a single new subtask.
+     * Useful for consolidating fragmented work or resolving redundancy dynamically.
+     * @param {string} parentTaskId 
+     * @param {string[]} subtaskIdsToMerge 
+     * @param {Object} mergedSpec New specification for the merged subtask
+     */
+    mergeSubtasks(parentTaskId, subtaskIdsToMerge, mergedSpec) {
+        const parentTask = this.taskQueue.find(t => t.id === parentTaskId);
+        if (!parentTask) {
+            logger.error('MERGE_FAILED', `Parent task ${parentTaskId} not found`);
+            return;
+        }
+
+        // Identify tasks to merge
+        const tasksToMerge = this.taskQueue.filter(t => subtaskIdsToMerge.includes(t.id));
+
+        // Remove old subtasks from queue and parent's list
+        this.taskQueue = this.taskQueue.filter(t => !subtaskIdsToMerge.includes(t.id));
+        parentTask.subtasks = parentTask.subtasks.filter(id => !subtaskIdsToMerge.includes(id));
+
+        // Create the merged subtask
+        const mergedTaskId = `merged_${uuidv4().split('-')[0]}`;
+        const mergedSubtask = {
+            ...mergedSpec,
+            id: mergedTaskId,
+            taskID: mergedTaskId,
+            parentTaskId: parentTaskId,
+            status: 'pending',
+            dependencies: mergedSpec.dependencies || [],
+            subtasks: [],
+            timestamp: new Date().toISOString(),
+            assignedTo: null,
+            retryCount: 0,
+            failedAgents: []
+        };
+
+        mergedSubtask.predictedImpact = this.metaReflection.predictImpact(mergedSubtask);
+
+        this.taskQueue.push(mergedSubtask);
+        parentTask.subtasks.push(mergedTaskId);
+
+        logger.info('SUBTASKS_MERGED', `Merged ${subtaskIdsToMerge.length} subtasks into ${mergedTaskId}`, {
+            parentTaskId,
+            mergedTaskId,
+            originalIds: subtaskIdsToMerge,
+            newDescription: mergedSpec.description
+        });
+
+        // Re-sort queue
+        this.taskQueue.sort((a, b) => {
+            const priorityDiff = (b.priority || 1) - (a.priority || 1);
+            if (priorityDiff !== 0) return priorityDiff;
+            return (b.predictedImpact || 0) - (a.predictedImpact || 0);
+        });
+
+        return mergedTaskId;
+    }
+
+
+    /**
      * Splits a task into smaller subtasks as a meta-reflection strategy.
      * @param {Object} task 
      */
@@ -694,9 +798,20 @@ class CoreEngine {
         if (!parentTask || parentTask.status === 'completed') return;
 
         const subtasks = this.taskQueue.filter(t => t.parentTaskId === parentTaskId);
-        const allCompleted = subtasks.length > 0 && subtasks.every(s => s.status === 'completed');
+        const allFinished = subtasks.length > 0 && subtasks.every(s => s.status === 'completed' || s.status === 'failed');
 
-        if (allCompleted) {
+        if (allFinished) {
+            const anyFailed = subtasks.some(s => s.status === 'failed');
+
+            if (anyFailed) {
+                logger.error('SUBTASKS_FAILED', `Some subtasks for parent ${parentTaskId} failed. Aborting parent task.`, {
+                    parentTaskId,
+                    failedSubtasks: subtasks.filter(s => s.status === 'failed').map(s => s.id)
+                });
+                parentTask.status = 'failed';
+                return;
+            }
+
             logger.info('SUBTASKS_COMPLETE', `All subtasks for parent ${parentTaskId} finished. Aggregating results.`, {
                 parentTaskId,
                 subtaskCount: subtasks.length
