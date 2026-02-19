@@ -7,14 +7,16 @@ const researchAgentId = engine.registerAgent({
     id: 'researcher-01',
     domainLabels: ['research', 'data-collection'],
     skillScores: { research: 0.9, data: 0.8 },
-    apiEndpoint: 'http://localhost:3001/task'
+    apiEndpoint: 'http://localhost:3001/task',
+    performanceData: { successRate: 0.9, tasksCompleted: 50 }
 });
 
 const logicAgentId = engine.registerAgent({
     id: 'logic-01',
     domainLabels: ['analysis', 'logic'],
     skillScores: { analysis: 0.95 },
-    apiEndpoint: 'http://localhost:3002/task'
+    apiEndpoint: 'http://localhost:3002/task',
+    performanceData: { successRate: 0.95, tasksCompleted: 120 }
 });
 
 // 2. Submit Tasks
@@ -29,9 +31,11 @@ const taskId = engine.submitTask({
 engine.assignTasks();
 
 // 4. Log Output
-engine.logOutput(taskId, {
-    success: true,
-    data: { trends: ['growth', 'modularity', 'autonomy'] }
+engine.logOutput(taskId, researchAgentId, {
+    resultData: { trends: ['growth', 'modularity', 'autonomy'] },
+    confidenceScore: 0.9,
+    actualImpact: 5,
+    executionTime: 200
 });
 
 console.log('\n--- Engine State Summary ---');

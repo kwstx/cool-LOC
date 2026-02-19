@@ -1,0 +1,30 @@
+﻿{"timestamp":"2026-02-19T13:21:41.124Z","action":"ENGINE_INIT","level":"INFO","message":"Core Engine initialized successfully"}
+
+--- Scenario 1: SPLIT Strategy ---
+{"timestamp":"2026-02-19T13:21:41.160Z","action":"AGENT_REGISTERED","level":"INFO","message":"Agent junior-1 registered with domains: coding","agentId":"junior-1","domainLabels":["coding"],"apiEndpoint":"http://junior1","skillScores":{"coding":3}}
+{"timestamp":"2026-02-19T13:21:41.164Z","action":"TASK_SUBMITTED","level":"INFO","message":"Task task_47ee0546-fff5-403a-afdd-d2294b0c70f4 submitted to queue (Impact: 12.8)","taskId":"task_47ee0546-fff5-403a-afdd-d2294b0c70f4","domainLabel":"coding","priority":10,"predictedImpact":12.8}
+{"timestamp":"2026-02-19T13:21:41.167Z","action":"LOW_PREDICTED_SUCCESS","level":"WARN","message":"Task task_47ee0546-fff5-403a-afdd-d2294b0c70f4 has low predicted success (0.3). Applying strategy: SPLIT","taskId":"task_47ee0546-fff5-403a-afdd-d2294b0c70f4","agentId":"junior-1","strategy":"SPLIT"}
+{"timestamp":"2026-02-19T13:21:41.168Z","action":"META_REFLECTION_STRATEGY","level":"INFO","message":"Splitting task task_47ee0546-fff5-403a-afdd-d2294b0c70f4 due to low success probability","taskId":"task_47ee0546-fff5-403a-afdd-d2294b0c70f4"}
+{"timestamp":"2026-02-19T13:21:41.169Z","action":"TASK_DECOMPOSITION","level":"INFO","message":"Decomposing complex task task_47ee0546-fff5-403a-afdd-d2294b0c70f4 into 2 subtasks","parentTaskId":"task_47ee0546-fff5-403a-afdd-d2294b0c70f4","subtaskCount":2}
+{"timestamp":"2026-02-19T13:21:41.170Z","action":"SUBTASK_CREATED","level":"INFO","message":"Subtask subtask_69bf7b40-0523-4573-a40f-59e62550a968 created for parent task_47ee0546-fff5-403a-afdd-d2294b0c70f4 (Impact: 8.3)","subtaskId":"subtask_69bf7b40-0523-4573-a40f-59e62550a968","parentTaskId":"task_47ee0546-fff5-403a-afdd-d2294b0c70f4","dependencies":[],"domainLabel":"coding","predictedImpact":8.3}
+{"timestamp":"2026-02-19T13:21:41.171Z","action":"SUBTASK_CREATED","level":"INFO","message":"Subtask subtask_d4dc90be-960f-47b2-a8f6-8003710fc223 created for parent task_47ee0546-fff5-403a-afdd-d2294b0c70f4 (Impact: 6.8)","subtaskId":"subtask_d4dc90be-960f-47b2-a8f6-8003710fc223","parentTaskId":"task_47ee0546-fff5-403a-afdd-d2294b0c70f4","dependencies":[],"domainLabel":"coding","predictedImpact":6.8}
+Task 1 Status: waiting_for_subtasks, Subtasks: 2
+PASSED: Task correctly split.
+
+--- Scenario 2: COLLABORATE Strategy ---
+{"timestamp":"2026-02-19T13:21:41.172Z","action":"AGENT_REGISTERED","level":"INFO","message":"Agent junior-2 registered with domains: coding","agentId":"junior-2","domainLabels":["coding"],"apiEndpoint":"http://junior2","skillScores":{"coding":3}}
+{"timestamp":"2026-02-19T13:21:41.173Z","action":"TASK_SUBMITTED","level":"INFO","message":"Task task_fd96e3fe-171b-4aea-8002-08e67e5cdf36 submitted to queue (Impact: 6.5)","taskId":"task_fd96e3fe-171b-4aea-8002-08e67e5cdf36","domainLabel":"coding","priority":5,"predictedImpact":6.5}
+{"timestamp":"2026-02-19T13:21:41.173Z","action":"LOW_PREDICTED_SUCCESS","level":"WARN","message":"Task task_fd96e3fe-171b-4aea-8002-08e67e5cdf36 has low predicted success (0.3). Applying strategy: COLLABORATE","taskId":"task_fd96e3fe-171b-4aea-8002-08e67e5cdf36","agentId":"junior-1","strategy":"COLLABORATE"}
+{"timestamp":"2026-02-19T13:21:41.174Z","action":"META_REFLECTION_STRATEGY","level":"INFO","message":"Tagging task task_fd96e3fe-171b-4aea-8002-08e67e5cdf36 for agent collaboration","taskId":"task_fd96e3fe-171b-4aea-8002-08e67e5cdf36"}
+{"timestamp":"2026-02-19T13:21:41.175Z","action":"TASK_DISPATCHED","level":"INFO","message":"Dispatching task task_fd96e3fe-171b-4aea-8002-08e67e5cdf36 to agent junior-1 (Prob: 0.3)","taskId":"task_fd96e3fe-171b-4aea-8002-08e67e5cdf36","agentId":"junior-1","predictedSuccess":0.3}
+{"timestamp":"2026-02-19T13:21:41.176Z","action":"META_REFLECTION_UPDATE","level":"INFO","message":"Updated metadata for agent junior-1 in domain coding","agentId":"junior-1","domain":"coding","successRate":"1.00","uncertainty":"0.50","confidence":"0.85"}
+{"timestamp":"2026-02-19T13:21:41.178Z","action":"TASK_EXECUTION_RECORD","taskId":"task_fd96e3fe-171b-4aea-8002-08e67e5cdf36","agentId":"junior-1","domain":"coding","predictedImpact":6.5,"actualImpact":0,"confidenceScore":0.9,"executionTime":50,"dependencies":[],"collaboration":{"isCollaborative":true,"parentTaskId":null},"status":"completed"}
+{"timestamp":"2026-02-19T13:21:41.181Z","action":"TASK_COMPLETED","level":"INFO","message":"Task task_fd96e3fe-171b-4aea-8002-08e67e5cdf36 completed and logged","taskId":"task_fd96e3fe-171b-4aea-8002-08e67e5cdf36","agentId":"junior-1","confidence":0.9,"isSubtask":false,"parentTaskId":null}
+Task 2 Assigned To: junior-1
+Task 2 Is Collaborative: true, Suggested Action: USE_COLLABORATION_PROTOCOL
+PASSED: Collaboration suggested.
+
+--- Scenario 3: Metadata Updates ---
+Task 2 was executed by: junior-1
+Domain Metadata (coding): {"tasksCompleted":1,"successRate":1,"averageImpact":0,"uncertainty":0.5,"confidence":0.85}
+PASSED: Domain metadata updated.

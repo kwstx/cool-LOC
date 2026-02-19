@@ -1,0 +1,14 @@
+﻿{"timestamp":"2026-02-19T13:23:33.109Z","action":"ENGINE_INIT","level":"INFO","message":"Core Engine initialized successfully"}
+{"timestamp":"2026-02-19T13:23:33.120Z","action":"AGENT_REGISTRATION_FAILED","level":"ERROR","message":"Agent validation failed","error":{"errors":["Missing or invalid \"performanceData\": must be an object containing historical metrics."],"metadata":{"id":"researcher-01","domainLabels":["research","data-collection"],"skillScores":{"research":0.9,"data":0.8},"apiEndpoint":"http://localhost:3001/task"}}}
+file:///C:/Users/galan/LOC/src/engine/CoreEngine.js:93
+            throw new Error(`Invalid Agent Registration: ${validation.errors.join(' ')}`);
+                  ^
+System.Management.Automation.RemoteException
+Error: Invalid Agent Registration: Missing or invalid "performanceData": must be an object containing historical metrics.
+    at CoreEngine.registerAgent (file:///C:/Users/galan/LOC/src/engine/CoreEngine.js:93:19)
+    at file:///C:/Users/galan/LOC/tests/sanity_check.js:6:32
+    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:665:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+System.Management.Automation.RemoteException
+Node.js v22.21.0

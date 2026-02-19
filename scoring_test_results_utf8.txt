@@ -1,0 +1,32 @@
+﻿{"timestamp":"2026-02-19T13:21:40.873Z","action":"ENGINE_INIT","level":"INFO","message":"Core Engine initialized successfully"}
+{"timestamp":"2026-02-19T13:21:40.885Z","action":"AGENT_REGISTERED","level":"INFO","message":"Agent expert-researcher registered with domains: research","agentId":"expert-researcher","domainLabels":["research"],"apiEndpoint":"http://expert-research/task","skillScores":{"research":10}}
+{"timestamp":"2026-02-19T13:21:40.886Z","action":"AGENT_REGISTERED","level":"INFO","message":"Agent junior-researcher registered with domains: research","agentId":"junior-researcher","domainLabels":["research"],"apiEndpoint":"http://junior-research/task","skillScores":{"research":4}}
+{"timestamp":"2026-02-19T13:21:40.887Z","action":"AGENT_REGISTERED","level":"INFO","message":"Agent analyst registered with domains: analysis","agentId":"analyst","domainLabels":["analysis"],"apiEndpoint":"http://analyst/task","skillScores":{"analysis":9}}
+
+--- Testing Scenarios ---
+
+SCENARIO 1: Selecting best agent for complex research task
+Task 1 Domain: research, Complexity: 8
+Best Agent Selected: expert-researcher (Expected: expert-researcher)
+
+SCENARIO 2: Compatibility scores
+{"timestamp":"2026-02-19T13:21:40.889Z","action":"SCORING_CHECK","level":"INFO","message":"Agent: expert-researcher, Score: 0.99","agentId":"expert-researcher","score":0.99,"taskDomain":"research"}
+Agent: expert-researcher, Score: 0.99
+{"timestamp":"2026-02-19T13:21:40.889Z","action":"SCORING_CHECK","level":"INFO","message":"Agent: junior-researcher, Score: 0.75","agentId":"junior-researcher","score":0.75,"taskDomain":"research"}
+Agent: junior-researcher, Score: 0.75
+{"timestamp":"2026-02-19T13:21:40.890Z","action":"SCORING_CHECK","level":"INFO","message":"Agent: analyst, Score: 0.5162","agentId":"analyst","score":0.5162,"taskDomain":"research"}
+Agent: analyst, Score: 0.5162
+
+SCENARIO 3: Dynamic reassignment if confidence is low
+{"timestamp":"2026-02-19T13:21:40.891Z","action":"TASK_SUBMITTED","level":"INFO","message":"Task task_dbde1b28-4248-41af-9799-7229578f7e87 submitted to queue (Impact: 7.4)","taskId":"task_dbde1b28-4248-41af-9799-7229578f7e87","domainLabel":"analysis","priority":8,"predictedImpact":7.4}
+Processing queue...
+{"timestamp":"2026-02-19T13:21:40.893Z","action":"TASK_DISPATCHED","level":"INFO","message":"Dispatching task task_dbde1b28-4248-41af-9799-7229578f7e87 to agent analyst (Prob: 0.9)","taskId":"task_dbde1b28-4248-41af-9799-7229578f7e87","agentId":"analyst","predictedSuccess":0.9}
+[Mock] Injecting low confidence for first attempt by analyst
+{"timestamp":"2026-02-19T13:21:40.893Z","action":"LOW_CONFIDENCE_REASSIGNMENT","level":"WARN","message":"Agent analyst reported low confidence (0.4) for task task_dbde1b28-4248-41af-9799-7229578f7e87. Reassigning...","taskId":"task_dbde1b28-4248-41af-9799-7229578f7e87","agentId":"analyst","confidenceScore":0.4}
+{"timestamp":"2026-02-19T13:21:40.894Z","action":"TASK_REQUEUED","level":"INFO","message":"Task task_dbde1b28-4248-41af-9799-7229578f7e87 returned to queue for next-best agent. Reason: Low confidence score: 0.4"}
+Task Status after first process: pending, Retry Count: 1
+Processing queue again...
+{"timestamp":"2026-02-19T13:21:40.894Z","action":"LOW_PREDICTED_SUCCESS","level":"WARN","message":"Task task_dbde1b28-4248-41af-9799-7229578f7e87 has low predicted success (0.1). Applying strategy: REROUTE","taskId":"task_dbde1b28-4248-41af-9799-7229578f7e87","agentId":"expert-researcher","strategy":"REROUTE"}
+{"timestamp":"2026-02-19T13:21:40.895Z","action":"TASK_REROUTED","level":"INFO","message":"Task task_dbde1b28-4248-41af-9799-7229578f7e87 rerouted/delayed for better agent compatibility"}
+Task Status after second process: pending
+Task Output: undefined

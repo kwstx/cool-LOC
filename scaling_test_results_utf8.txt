@@ -1,0 +1,58 @@
+﻿
+=== STEP 12: INCREMENTAL TESTING AND SCALING ===
+
+{"timestamp":"2026-02-19T13:21:41.507Z","action":"ENGINE_INIT","level":"INFO","message":"Core Engine initialized successfully"}
+>>> PHASE 1: Single Agent Validation
+{"timestamp":"2026-02-19T13:21:41.510Z","action":"AGENT_REGISTERED","level":"INFO","message":"Agent agent-alpha registered with domains: research, analysis","agentId":"agent-alpha","domainLabels":["research","analysis"],"apiEndpoint":"http://localhost:3001/task","skillScores":{"research":0.8,"analysis":0.7}}
+{"timestamp":"2026-02-19T13:21:41.512Z","action":"TASK_SUBMITTED","level":"INFO","message":"Task task_e0afa12d-6e93-4170-8275-e6d01d70af16 submitted to queue (Impact: 4.7)","taskId":"task_e0afa12d-6e93-4170-8275-e6d01d70af16","domainLabel":"research","priority":5,"predictedImpact":4.7}
+{"timestamp":"2026-02-19T13:21:41.512Z","action":"TASK_SUBMITTED","level":"INFO","message":"Task task_9a80ef7d-a5b7-4eee-aa26-8f1dd19cc856 submitted to queue (Impact: 5.36)","taskId":"task_9a80ef7d-a5b7-4eee-aa26-8f1dd19cc856","domainLabel":"analysis","priority":4,"predictedImpact":5.36}
+Processing Phase 1 tasks...
+{"timestamp":"2026-02-19T13:21:41.514Z","action":"LOW_PREDICTED_SUCCESS","level":"WARN","message":"Task task_e0afa12d-6e93-4170-8275-e6d01d70af16 has low predicted success (0.08). Applying strategy: REROUTE","taskId":"task_e0afa12d-6e93-4170-8275-e6d01d70af16","agentId":"agent-alpha","strategy":"REROUTE"}
+{"timestamp":"2026-02-19T13:21:41.514Z","action":"TASK_REROUTED","level":"INFO","message":"Task task_e0afa12d-6e93-4170-8275-e6d01d70af16 rerouted/delayed for better agent compatibility"}
+{"timestamp":"2026-02-19T13:21:41.516Z","action":"LOW_PREDICTED_SUCCESS","level":"WARN","message":"Task task_e0afa12d-6e93-4170-8275-e6d01d70af16 has low predicted success (0.08). Applying strategy: REROUTE","taskId":"task_e0afa12d-6e93-4170-8275-e6d01d70af16","agentId":"agent-alpha","strategy":"REROUTE"}
+{"timestamp":"2026-02-19T13:21:41.517Z","action":"TASK_REROUTED","level":"INFO","message":"Task task_e0afa12d-6e93-4170-8275-e6d01d70af16 rerouted/delayed for better agent compatibility"}
+Phase 1 Results:
+Tasks Completed: 0
+
+>>> PHASE 2: Gradual Scaling & Decomposition
+{"timestamp":"2026-02-19T13:21:43.530Z","action":"AGENT_REGISTERED","level":"INFO","message":"Agent agent-beta registered with domains: analysis, logic","agentId":"agent-beta","domainLabels":["analysis","logic"],"apiEndpoint":"http://localhost:3002/task","skillScores":{"analysis":0.9,"logic":0.85}}
+{"timestamp":"2026-02-19T13:21:43.531Z","action":"TASK_SUBMITTED","level":"INFO","message":"Task task_dd0e410a-0287-4070-8aa5-00df592c624f submitted to queue (Impact: 12.8)","taskId":"task_dd0e410a-0287-4070-8aa5-00df592c624f","domainLabel":"logic","priority":8,"predictedImpact":12.8}
+Processing Phase 2 tasks...
+{"timestamp":"2026-02-19T13:21:43.532Z","action":"LOW_PREDICTED_SUCCESS","level":"WARN","message":"Task task_dd0e410a-0287-4070-8aa5-00df592c624f has low predicted success (0.085). Applying strategy: SPLIT","taskId":"task_dd0e410a-0287-4070-8aa5-00df592c624f","agentId":"agent-beta","strategy":"SPLIT"}
+{"timestamp":"2026-02-19T13:21:43.533Z","action":"META_REFLECTION_STRATEGY","level":"INFO","message":"Splitting task task_dd0e410a-0287-4070-8aa5-00df592c624f due to low success probability","taskId":"task_dd0e410a-0287-4070-8aa5-00df592c624f"}
+{"timestamp":"2026-02-19T13:21:43.534Z","action":"TASK_DECOMPOSITION","level":"INFO","message":"Decomposing complex task task_dd0e410a-0287-4070-8aa5-00df592c624f into 2 subtasks","parentTaskId":"task_dd0e410a-0287-4070-8aa5-00df592c624f","subtaskCount":2}
+{"timestamp":"2026-02-19T13:21:43.534Z","action":"SUBTASK_CREATED","level":"INFO","message":"Subtask subtask_c102b991-e5c5-4de7-8bda-1474e805b293 created for parent task_dd0e410a-0287-4070-8aa5-00df592c624f (Impact: 7.7)","subtaskId":"subtask_c102b991-e5c5-4de7-8bda-1474e805b293","parentTaskId":"task_dd0e410a-0287-4070-8aa5-00df592c624f","dependencies":[],"domainLabel":"logic","predictedImpact":7.7}
+{"timestamp":"2026-02-19T13:21:43.535Z","action":"SUBTASK_CREATED","level":"INFO","message":"Subtask subtask_82b378ca-3a49-4b8c-ad55-10984db2b4d0 created for parent task_dd0e410a-0287-4070-8aa5-00df592c624f (Impact: 7.4)","subtaskId":"subtask_82b378ca-3a49-4b8c-ad55-10984db2b4d0","parentTaskId":"task_dd0e410a-0287-4070-8aa5-00df592c624f","dependencies":[],"domainLabel":"logic","predictedImpact":7.4}
+{"timestamp":"2026-02-19T13:21:45.544Z","action":"LOW_PREDICTED_SUCCESS","level":"WARN","message":"Task subtask_c102b991-e5c5-4de7-8bda-1474e805b293 has low predicted success (0.085). Applying strategy: REROUTE","taskId":"subtask_c102b991-e5c5-4de7-8bda-1474e805b293","agentId":"agent-beta","strategy":"REROUTE"}
+{"timestamp":"2026-02-19T13:21:45.548Z","action":"TASK_REROUTED","level":"INFO","message":"Task subtask_c102b991-e5c5-4de7-8bda-1474e805b293 rerouted/delayed for better agent compatibility"}
+{"timestamp":"2026-02-19T13:21:45.550Z","action":"LOW_PREDICTED_SUCCESS","level":"WARN","message":"Task subtask_c102b991-e5c5-4de7-8bda-1474e805b293 has low predicted success (0.085). Applying strategy: REROUTE","taskId":"subtask_c102b991-e5c5-4de7-8bda-1474e805b293","agentId":"agent-beta","strategy":"REROUTE"}
+{"timestamp":"2026-02-19T13:21:45.551Z","action":"TASK_REROUTED","level":"INFO","message":"Task subtask_c102b991-e5c5-4de7-8bda-1474e805b293 rerouted/delayed for better agent compatibility"}
+Phase 2 Results:
+Total Task Outputs: 0
+Complex Task Status: waiting_for_subtasks
+Decomposed into 2 subtasks.
+
+>>> PHASE 3: Cooperative Workflows
+{"timestamp":"2026-02-19T13:21:48.562Z","action":"AGENT_REGISTERED","level":"INFO","message":"Agent agent-gamma registered with domains: optimization, data-science","agentId":"agent-gamma","domainLabels":["optimization","data-science"],"apiEndpoint":"http://localhost:3003/task","skillScores":{"optimization":0.9,"data-science":0.8}}
+{"timestamp":"2026-02-19T13:21:48.569Z","action":"TASK_SUBMITTED","level":"INFO","message":"Task task_9572bf40-2a2a-4454-b813-6c9401e95e51 submitted to queue (Impact: 8.84)","taskId":"task_9572bf40-2a2a-4454-b813-6c9401e95e51","domainLabel":"data-science","priority":9,"predictedImpact":8.84}
+{"timestamp":"2026-02-19T13:21:48.576Z","action":"META_REFLECTION_STRATEGY","level":"INFO","message":"Tagging task task_9572bf40-2a2a-4454-b813-6c9401e95e51 for agent collaboration","taskId":"task_9572bf40-2a2a-4454-b813-6c9401e95e51"}
+Processing Phase 3 tasks...
+{"timestamp":"2026-02-19T13:21:48.577Z","action":"LOW_PREDICTED_SUCCESS","level":"WARN","message":"Task task_9572bf40-2a2a-4454-b813-6c9401e95e51 has low predicted success (0.08). Applying strategy: REROUTE","taskId":"task_9572bf40-2a2a-4454-b813-6c9401e95e51","agentId":"agent-gamma","strategy":"REROUTE"}
+{"timestamp":"2026-02-19T13:21:48.579Z","action":"TASK_REROUTED","level":"INFO","message":"Task task_9572bf40-2a2a-4454-b813-6c9401e95e51 rerouted/delayed for better agent compatibility"}
+{"timestamp":"2026-02-19T13:21:48.626Z","action":"SHARE_RESULT","level":"INFO","message":"Agent agent-gamma initiated SHARE_RESULT for task task_9572bf40-2a2a-4454-b813-6c9401e95e51","taskId":"task_9572bf40-2a2a-4454-b813-6c9401e95e51","contextId":"task_9572bf40-2a2a-4454-b813-6c9401e95e51"}
+{"timestamp":"2026-02-19T13:21:48.634Z","action":"REQUEST_INPUT","level":"INFO","message":"Agent agent-alpha initiated REQUEST_INPUT for task task_9572bf40-2a2a-4454-b813-6c9401e95e51","taskId":"task_9572bf40-2a2a-4454-b813-6c9401e95e51","contextId":"task_9572bf40-2a2a-4454-b813-6c9401e95e51"}
+Phase 3 Results:
+Collaboration Logs Count: 2
+Final Task Status: pending
+
+=== FINAL MONITORING SUMMARY ===
+Total Tasks Managed: 6
+Successfully Completed: 0
+Overall Success Rate: 0.00%
+
+Agent Performance:
+- agent-alpha: Success Rate: 0.00%, Tasks: 0, Avg Impact: 0.00
+- agent-beta: Success Rate: 0.00%, Tasks: 0, Avg Impact: 0.00
+- agent-gamma: Success Rate: 0.00%, Tasks: 0, Avg Impact: 0.00
+
+Test completed successfully.

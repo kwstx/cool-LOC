@@ -1,0 +1,18 @@
+﻿{"timestamp":"2026-02-19T13:25:30.724Z","action":"ENGINE_INIT","level":"INFO","message":"Core Engine initialized successfully"}
+{"timestamp":"2026-02-19T13:25:30.745Z","action":"AGENT_REGISTERED","level":"INFO","message":"Agent researcher-01 registered with domains: research, data-collection","agentId":"researcher-01","domainLabels":["research","data-collection"],"apiEndpoint":"http://localhost:3001/task","skillScores":{"research":0.9,"data":0.8}}
+{"timestamp":"2026-02-19T13:25:30.748Z","action":"AGENT_REGISTERED","level":"INFO","message":"Agent logic-01 registered with domains: analysis, logic","agentId":"logic-01","domainLabels":["analysis","logic"],"apiEndpoint":"http://localhost:3002/task","skillScores":{"analysis":0.95}}
+{"timestamp":"2026-02-19T13:25:30.752Z","action":"TASK_SUBMITTED","level":"INFO","message":"Task task_0d2f53e6-06ce-458e-970c-cd7c519aae9e submitted to queue (Impact: 5.6)","taskId":"task_0d2f53e6-06ce-458e-970c-cd7c519aae9e","domainLabel":"research","priority":5,"predictedImpact":5.6}
+{"timestamp":"2026-02-19T13:25:30.762Z","action":"LOW_PREDICTED_SUCCESS","level":"WARN","message":"Task task_0d2f53e6-06ce-458e-970c-cd7c519aae9e has low predicted success (0.09). Applying strategy: REROUTE","taskId":"task_0d2f53e6-06ce-458e-970c-cd7c519aae9e","agentId":"researcher-01","strategy":"REROUTE"}
+{"timestamp":"2026-02-19T13:25:30.764Z","action":"TASK_REROUTED","level":"INFO","message":"Task task_0d2f53e6-06ce-458e-970c-cd7c519aae9e rerouted/delayed for better agent compatibility"}
+file:///C:/Users/galan/LOC/src/engine/CoreEngine.js:507
+            resultData: output.resultData,
+                               ^
+System.Management.Automation.RemoteException
+TypeError: Cannot read properties of undefined (reading 'resultData')
+    at CoreEngine.logOutput (file:///C:/Users/galan/LOC/src/engine/CoreEngine.js:507:32)
+    at file:///C:/Users/galan/LOC/tests/sanity_check.js:34:8
+    at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:665:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+System.Management.Automation.RemoteException
+Node.js v22.21.0
