@@ -178,9 +178,11 @@ class CoreEngine {
     }
 
     /**
-     * Dequeues and processes the next available task
+     * Dequeues and processes available tasks.
+     * Also performs health checks for cycles and stalls.
      */
     async processQueue() {
+        this.detectAndHandleCycles();
         const nextTask = this.taskQueue.find(t => {
             if (t.status !== 'pending') return false;
 
@@ -189,10 +191,19 @@ class CoreEngine {
 
             // Dependency check: all dependency tasks must be completed
             if (t.dependencies && t.dependencies.length > 0) {
-                const allDepsMet = t.dependencies.every(depId => {
+                const depStatuses = t.dependencies.map(depId => {
                     const depTask = this.taskQueue.find(task => task.id === depId);
-                    return depTask && depTask.status === 'completed';
+                    return depTask ? depTask.status : 'missing';
                 });
+
+                // If any dependency failed or is missing, this task cannot proceed as planned
+                if (depStatuses.some(s => s === 'failed' || s === 'missing')) {
+                    logger.error('DEPENDENCY_FAILURE_CASCADE', `Task ${t.id} cannot proceed because dependencies failed or are missing`, { taskId: t.id, depStatuses });
+                    this.handleTaskFailure(t, 'SYSTEM_DEPENDENCY_MANAGER', new Error('Dependency failed or missing'));
+                    return false;
+                }
+
+                const allDepsMet = depStatuses.every(s => s === 'completed');
                 if (!allDepsMet) return false;
             }
 
@@ -739,6 +750,58 @@ class CoreEngine {
         // Meta-Reflection Module update for domain-specific metrics
         if (domain) {
             this.metaReflection.updateAgentMetadata(agentId, domain, success, impact);
+        }
+    }
+
+    /**
+     * Detects cyclic dependencies and fails the involved tasks.
+     */
+    detectAndHandleCycles() {
+        const tasks = this.taskQueue.filter(t => t.status === 'pending');
+        const adj = {};
+        tasks.forEach(t => {
+            adj[t.id] = t.dependencies || [];
+        });
+
+        const visited = new Set();
+        const stack = new Set();
+        const cycles = [];
+
+        const find = (u, path) => {
+            visited.add(u);
+            stack.add(u);
+            path.push(u);
+
+            for (const v of (adj[u] || [])) {
+                if (!visited.has(v)) {
+                    find(v, path);
+                } else if (stack.has(v)) {
+                    const cycle = path.slice(path.indexOf(v));
+                    cycles.push(cycle);
+                }
+            }
+
+            stack.delete(u);
+            path.pop();
+        };
+
+        Object.keys(adj).forEach(id => {
+            if (!visited.has(id)) {
+                find(id, []);
+            }
+        });
+
+        if (cycles.length > 0) {
+            logger.warn('CYCLES_DETECTED', `Found ${cycles.length} cyclic dependency paths. Breaking cycles...`);
+
+            const tasksInCycles = new Set(cycles.flat());
+            tasksInCycles.forEach(taskId => {
+                const task = this.taskQueue.find(t => t.id === taskId);
+                if (task && task.status === 'pending') {
+                    logger.error('CYCLIC_DEPENDENCY_FAILURE', `Failing task ${taskId} due to cyclic dependency cycle`, { cycle: cycles.find(c => c.includes(taskId)) });
+                    this.handleTaskFailure(task, 'SYSTEM_CYCLE_DETECTOR', new Error('Cyclic dependency detected'));
+                }
+            });
         }
     }
 }

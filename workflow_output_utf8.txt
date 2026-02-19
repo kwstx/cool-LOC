@@ -1,0 +1,49 @@
+﻿{"timestamp":"2026-02-19T14:40:30.993Z","action":"ENGINE_INIT","level":"INFO","message":"Core Engine initialized successfully"}
+{"timestamp":"2026-02-19T14:40:30.996Z","action":"AGENT_REGISTRATION_FAILED","level":"ERROR","message":"Agent validation failed","error":{"errors":["Invalid domain label: \"data-analysis\". Valid domains are: research, data-collection, analysis, logic, coding, creative-writing, optimization, translation, summarization, data-science."],"metadata":{"id":"agent-alpha","domainLabels":["data-analysis","logic"],"skillScores":{"data-analysis":9,"logic":8},"apiEndpoint":"http://alpha","performanceData":{}}}}
+node : Workflow failed: 
+Error: Invalid Agent 
+Registration: Invalid 
+domain label: 
+"data-analysis". Valid 
+domains are: research, 
+data-collection, analysis, 
+logic, coding, 
+creative-writing, 
+optimization, translation, 
+summarization, data-science.
+At line:1 char:1
++ node tests/complex_depende
+ncy_workflow.js > 
+workflow_output.txt 2>&1
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~
+    + CategoryInfo          
+    : NotSpecified: (Workf  
+  low failed..., data-sci   
+ ence.:String) [], Remot    
+eException
+    + FullyQualifiedErrorId 
+    : NativeCommandError
+ 
+    at 
+CoreEngine.registerAgent (fi
+le:///C:/Users/galan/LOC/src
+/engine/CoreEngine.js:93:19)
+    at runComplexWorkflow (f
+ile:///C:/Users/galan/LOC/te
+sts/complex_dependency_workf
+low.js:8:12)
+    at file:///C:/Users/gala
+n/LOC/tests/complex_dependen
+cy_workflow.js:157:1
+    at ModuleJob.run (node:i
+nternal/modules/esm/module_j
+ob:343:25)
+    at async onImport.traceP
+romise.__proto__ (node:inter
+nal/modules/esm/loader:665:2
+6)
+    at async asyncRunEntryPo
+intWithESMLoader (node:inter
+nal/modules/run_main:117:5)
