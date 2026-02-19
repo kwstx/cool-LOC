@@ -1,0 +1,60 @@
+﻿{"timestamp":"2026-02-19T12:23:15.900Z","action":"ENGINE_INIT","level":"INFO","message":"Core Engine initialized successfully"}
+{"timestamp":"2026-02-19T12:23:15.905Z","action":"LOOP_STARTED","level":"INFO","message":"Execution loop started","intervalMs":1000}
+--- TEST_START ---
+--- Starting API Exposure Tests ---
+
+Testing Health Check (No Auth)...
+{"timestamp":"2026-02-19T12:23:16.214Z","action":"API_SERVER_STARTED","level":"INFO","message":"LOC API Server running on port 3000"}
+Status: 401 (Expected: 401)
+
+Testing Health Check (With Auth)...
+Health Data: {
+  status: 'healthy',
+  engineActive: true,
+  agentCount: 0,
+  queueSize: 0,
+  timestamp: '2026-02-19T12:23:16.296Z'
+}
+
+Registering Agent...
+{"timestamp":"2026-02-19T12:23:16.352Z","action":"AGENT_REGISTERED","level":"INFO","message":"Agent api_agent_1 registered with domains: research, analysis","agentId":"api_agent_1","domainLabels":["research","analysis"],"apiEndpoint":"http://mock-agent-1/api","skillScores":{"research":9,"analysis":8}}
+Agent Registration Result: { agentId: 'api_agent_1', message: 'Agent registered successfully' }
+
+Submitting Task...
+{"timestamp":"2026-02-19T12:23:16.376Z","action":"TASK_SUBMITTED","level":"INFO","message":"Task task_3e28730c-871f-40bd-8b54-2acb637d69d8 submitted to queue (Impact: 6.32)","taskId":"task_3e28730c-871f-40bd-8b54-2acb637d69d8","domainLabel":"analysis","priority":2,"predictedImpact":6.32}
+Task Submission Result: {
+  taskId: 'task_3e28730c-871f-40bd-8b54-2acb637d69d8',
+  message: 'Task submitted successfully'
+}
+
+Polling for task task_3e28730c-871f-40bd-8b54-2acb637d69d8 status...
+Poll 1: Status = pending
+{"timestamp":"2026-02-19T12:23:16.919Z","action":"TASK_DISPATCHED","level":"INFO","message":"Dispatching task task_3e28730c-871f-40bd-8b54-2acb637d69d8 to agent api_agent_1 (Prob: 0.8)","taskId":"task_3e28730c-871f-40bd-8b54-2acb637d69d8","agentId":"api_agent_1","predictedSuccess":0.8}
+Poll 2: Status = processing
+{"timestamp":"2026-02-19T12:23:17.428Z","action":"META_REFLECTION_UPDATE","level":"INFO","message":"Updated metadata for agent api_agent_1 in domain analysis","agentId":"api_agent_1","domain":"analysis","successRate":"1.00","uncertainty":"0.50","confidence":"0.85"}
+{"timestamp":"2026-02-19T12:23:17.430Z","action":"TASK_EXECUTION_RECORD","taskId":"task_3e28730c-871f-40bd-8b54-2acb637d69d8","agentId":"api_agent_1","domain":"analysis","predictedImpact":6.32,"actualImpact":6.5,"confidenceScore":0.96,"executionTime":150,"dependencies":[],"collaboration":{"isCollaborative":false,"parentTaskId":null},"status":"completed"}
+{"timestamp":"2026-02-19T12:23:17.432Z","action":"TASK_COMPLETED","level":"INFO","message":"Task task_3e28730c-871f-40bd-8b54-2acb637d69d8 completed and logged","taskId":"task_3e28730c-871f-40bd-8b54-2acb637d69d8","agentId":"api_agent_1","confidence":0.96,"isSubtask":false,"parentTaskId":null}
+Poll 3: Status = completed
+
+Retrieving Output...
+Output Data: {
+  taskId: 'task_3e28730c-871f-40bd-8b54-2acb637d69d8',
+  agentId: 'api_agent_1',
+  timestamp: '2026-02-19T12:23:17.427Z',
+  resultData: 'Task "Evaluate the impact of AI on specialized workforce" executed successfully.',
+  confidenceScore: 0.96,
+  predictedImpact: 6.32,
+  actualImpact: 6.5,
+  executionTime: 150
+}
+
+Querying All Tasks...
+Total Tasks in Workflow: 1
+έΦΝέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦυέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦυέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦυέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦυέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦυέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦυέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦυέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΡ
+έΦΓ (index) έΦΓ id                                          έΦΓ description                                          έΦΓ status      έΦΓ domainLabel έΦΓ assignedTo    έΦΓ predictedImpact έΦΓ progress έΦΓ
+έΦεέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦ╝έΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦ╝έΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦ╝έΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦ╝έΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦ╝έΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦ╝έΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦ╝έΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦν
+έΦΓ 0       έΦΓ 'task_3e28730c-871f-40bd-8b54-2acb637d69d8' έΦΓ 'Evaluate the impact of AI on specialized workforce' έΦΓ 'completed' έΦΓ 'analysis'  έΦΓ 'api_agent_1' έΦΓ 6.32            έΦΓ '1/1'    έΦΓ
+έΦΦέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦ┤έΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦ┤έΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦ┤έΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦ┤έΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦ┤έΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦ┤έΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦ┤έΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦΑέΦα
+
+--- API Exposure Tests Completed Successfully ---
+{"timestamp":"2026-02-19T12:23:18.456Z","action":"LOOP_STOPPED","level":"INFO","message":"Execution loop stopped"}
