@@ -178,6 +178,62 @@ class CoreEngine {
     }
 
     /**
+     * Allows an agent to attempt to claim a specific task.
+     * This simulates race conditions where multiple agents might try to grab the same task.
+     * @param {string} agentId 
+     * @param {string} taskId 
+     * @returns {Promise<boolean>} Success or failure of the claim
+     */
+    async agentClaimTask(agentId, taskId) {
+        const task = this.taskQueue.find(t => t.id === taskId);
+        const agent = this.agents[agentId];
+
+        if (!task || !agent) {
+            logger.error('CLAIM_FAILED', `Invalid task or agent for claim: Task ${taskId}, Agent ${agentId}`);
+            return false;
+        }
+
+        // Conflict Check: Is the task already claimed or processing?
+        if (task.status !== 'pending') {
+            logger.warn('TASK_ALREADY_CLAIMED', `Agent ${agentId} tried to claim task ${taskId}, but it is already ${task.status}`, {
+                taskId,
+                currentStatus: task.status,
+                assignedTo: task.assignedTo
+            });
+            return false;
+        }
+
+        // Success Probability Check (Meta-Reflection Integration)
+        const prediction = this.metaReflection.predictSuccess(agent, task);
+        if (prediction < 0.3) {
+            logger.warn('CLAIM_REJECTED_LOW_PROBABILITY', `Agent ${agentId} claim for ${taskId} rejected due to extremely low success probability (${prediction})`);
+            return false;
+        }
+
+        // Atomic Assignment (Simulated)
+        // In a real distributed system, this would be a CAS (Compare-And-Swap) operation or a lock.
+        task.status = 'processing';
+        task.assignedTo = agentId;
+        agent.status = 'busy';
+
+        logger.info('TASK_CLAIM_SUCCESS', `Agent ${agentId} successfully claimed task ${taskId}`, {
+            taskId,
+            agentId,
+            predictedSuccess: prediction
+        });
+
+        // Trigger execution
+        try {
+            const result = await this.dispatchToAgent(agent, task);
+            this.logOutput(taskId, agentId, result);
+            return true;
+        } catch (error) {
+            this.handleTaskFailure(task, agentId, error);
+            return false;
+        }
+    }
+
+    /**
      * Dequeues and processes available tasks.
      * Also performs health checks for cycles and stalls.
      */

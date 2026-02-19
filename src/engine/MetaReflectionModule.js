@@ -41,12 +41,27 @@ class MetaReflectionModule {
         const uncertainty = domainPerf.uncertainty || (1 / (domainPerf.tasksCompleted + 1));
 
         // Predicted probability: Weighted average of skill and history, adjusted by uncertainty
-        // If high uncertainty (low experience), skill has more weight. 
-        // If low uncertainty (high experience), history has more weight.
         const historyWeight = 1 - uncertainty;
         const skillWeight = uncertainty;
 
-        const prediction = (historyScore * historyWeight) + (skillScore * skillWeight);
+        let prediction = (historyScore * historyWeight) + (skillScore * skillWeight);
+
+        // 4. Interference Check: Check for active tasks that reduce success probability
+        if (task.interferedBy && Array.isArray(task.interferedBy)) {
+            const activeInterferences = this.core.taskQueue.filter(t =>
+                task.interferedBy.includes(t.domainLabel) &&
+                (t.status === 'processing' || t.status === 'completed')
+            );
+
+            if (activeInterferences.length > 0) {
+                const reduction = activeInterferences.length * 0.15; // 15% reduction per interfering task
+                prediction = Math.max(0.1, prediction - reduction);
+                logger.warn('INTERFERENCE_DETECTED', `Task ${task.id} success probability reduced by ${reduction.toFixed(2)} due to ${activeInterferences.length} active/completed interfering tasks`, {
+                    taskId: task.id,
+                    activeInterferences: activeInterferences.map(i => i.id)
+                });
+            }
+        }
 
         return parseFloat(prediction.toFixed(4));
     }
