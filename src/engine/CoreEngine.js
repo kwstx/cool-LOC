@@ -334,6 +334,12 @@ class CoreEngine {
             } else if (strategy === 'REROUTE') {
                 // Return to queue, effectively waiting for a more suitable agent or state
                 logger.info('TASK_REROUTED', `Task ${nextTask.id} rerouted/delayed for better agent compatibility`);
+
+                // Robustness: Increment retry count on reroute to prevent infinite loops
+                nextTask.retryCount = (nextTask.retryCount || 0) + 0.2; // Minor increment for reroutes
+                if (nextTask.retryCount >= 3) {
+                    this.handleTaskFailure(nextTask, 'SYSTEM_REMEDIATION_MANAGER', new Error('Task rerouted too many times without success strategy'));
+                }
                 return;
             }
         }
@@ -365,16 +371,23 @@ class CoreEngine {
         try {
             const result = await this.dispatchToAgent(this.agents[agentId], nextTask);
 
+            // Robustness: Handle nonsensical results (null, undefined, non-objects)
+            if (!result || typeof result !== 'object') {
+                throw new Error(`Agent ${agentId} returned invalid result type: ${typeof result}`);
+            }
+
             // Logic for dynamic reassignment if confidence is too low
             const CONFIDENCE_THRESHOLD = 0.6;
-            if (result.confidenceScore < CONFIDENCE_THRESHOLD) {
-                logger.warn('LOW_CONFIDENCE_REASSIGNMENT', `Agent ${agentId} reported low confidence (${result.confidenceScore}) for task ${nextTask.id}. Reassigning...`, {
+            const confidenceScore = typeof result.confidenceScore === 'number' ? result.confidenceScore : 0;
+
+            if (confidenceScore < CONFIDENCE_THRESHOLD) {
+                logger.warn('LOW_CONFIDENCE_REASSIGNMENT', `Agent ${agentId} reported low confidence (${confidenceScore}) for task ${nextTask.id}. Reassigning...`, {
                     taskId: nextTask.id,
                     agentId,
-                    confidenceScore: result.confidenceScore
+                    confidenceScore
                 });
 
-                this.handleTaskReassignment(nextTask, agentId, `Low confidence score: ${result.confidenceScore}`);
+                this.handleTaskReassignment(nextTask, agentId, `Low confidence score: ${confidenceScore}`);
                 return;
             }
 
@@ -745,11 +758,11 @@ class CoreEngine {
             taskId,
             agentId,
             timestamp,
-            resultData: output.resultData,
-            confidenceScore: output.confidenceScore,
+            resultData: output.resultData || 'NO_DATA_RETURNED',
+            confidenceScore: typeof output.confidenceScore === 'number' ? output.confidenceScore : 0,
             predictedImpact: task ? task.predictedImpact : 0,
-            actualImpact: output.actualImpact || 0,
-            executionTime: output.executionTime
+            actualImpact: typeof output.actualImpact === 'number' ? output.actualImpact : 0,
+            executionTime: typeof output.executionTime === 'number' ? output.executionTime : 0
         };
 
         if (task) {

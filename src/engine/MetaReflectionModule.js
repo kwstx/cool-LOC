@@ -20,6 +20,11 @@ class MetaReflectionModule {
     predictSuccess(agent, task) {
         const domain = task.domainLabel;
 
+        // Robustness: Handle missing or invalid domain labels
+        if (!domain || typeof domain !== 'string') {
+            return 0.1; // Baseline low probability for invalid tasks
+        }
+
         // Ensure performanceData exists and has domain tracking
         if (!agent.performanceData.domains) {
             agent.performanceData.domains = {};

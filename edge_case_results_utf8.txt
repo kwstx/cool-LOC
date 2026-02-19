@@ -1,0 +1,160 @@
+﻿--- STARTING EDGE CASE SIMULATION ---
+{"timestamp":"2026-02-19T18:27:02.517Z","action":"ENGINE_INIT","level":"INFO","message":"Core Engine initialized successfully"}
+>>> Registering Base Agents...
+{"timestamp":"2026-02-19T18:27:02.521Z","action":"AGENT_REGISTERED","level":"INFO","message":"Agent base_agent_0 registered with domains: logic","agentId":"base_agent_0","domainLabels":["logic"],"apiEndpoint":"http://localhost/agents/base_0","skillScores":{"logic":9}}
+{"timestamp":"2026-02-19T18:27:02.522Z","action":"AGENT_REGISTERED","level":"INFO","message":"Agent base_agent_1 registered with domains: analysis","agentId":"base_agent_1","domainLabels":["analysis"],"apiEndpoint":"http://localhost/agents/base_1","skillScores":{"analysis":9}}
+{"timestamp":"2026-02-19T18:27:02.522Z","action":"AGENT_REGISTERED","level":"INFO","message":"Agent base_agent_2 registered with domains: coding","agentId":"base_agent_2","domainLabels":["coding"],"apiEndpoint":"http://localhost/agents/base_2","skillScores":{"coding":9}}
+
+--- PHASE 1: MALFORMED TASK SUBMISSION ---
+{"timestamp":"2026-02-19T18:27:02.524Z","action":"TASK_SUBMISSION_FAILED","level":"ERROR","message":"Task validation failed","error":{"errors":["Missing or invalid \"description\": must be a string.","Missing or invalid \"domainLabel\": must be a string.","Missing or invalid \"complexityScore\": must be a number."],"taskData":{}}}
+[OK] Malformed task 0 rejected: Invalid Task: Missing or invalid "description": must be a string. Missing or invalid "domainLabel": must be a string. Missing or invalid "complexityScore": must be a number.
+{"timestamp":"2026-02-19T18:27:02.525Z","action":"TASK_SUBMISSION_FAILED","level":"ERROR","message":"Task validation failed","error":{"errors":["Missing or invalid \"domainLabel\": must be a string.","Missing or invalid \"complexityScore\": must be a number."],"taskData":{"description":"Missing domain"}}}
+[OK] Malformed task 1 rejected: Invalid Task: Missing or invalid "domainLabel": must be a string. Missing or invalid "complexityScore": must be a number.
+{"timestamp":"2026-02-19T18:27:02.525Z","action":"TASK_SUBMISSION_FAILED","level":"ERROR","message":"Task validation failed","error":{"errors":["Missing or invalid \"description\": must be a string."],"taskData":{"domainLabel":"logic","complexityScore":5}}}
+[OK] Malformed task 2 rejected: Invalid Task: Missing or invalid "description": must be a string.
+{"timestamp":"2026-02-19T18:27:02.526Z","action":"TASK_SUBMISSION_FAILED","level":"ERROR","message":"Task validation failed","error":{"errors":["Invalid \"complexityScore\": must be between 1 and 10."],"taskData":{"description":"Invalid complexity","domainLabel":"logic","complexityScore":100}}}
+[OK] Malformed task 3 rejected: Invalid Task: Invalid "complexityScore": must be between 1 and 10.
+{"timestamp":"2026-02-19T18:27:02.526Z","action":"TASK_SUBMISSION_FAILED","level":"ERROR","message":"Task validation failed","error":{"errors":["Invalid \"domainLabel\": \"black-magic\". Valid domains are: research, data-collection, analysis, logic, coding, creative-writing, optimization, translation, summarization, data-science."],"taskData":{"description":"Invalid domain","domainLabel":"black-magic","complexityScore":5}}}
+[OK] Malformed task 4 rejected: Invalid Task: Invalid "domainLabel": "black-magic". Valid domains are: research, data-collection, analysis, logic, coding, creative-writing, optimization, translation, summarization, data-science.
+
+--- PHASE 2: NONSENSICAL AGENT OUTPUTS ---
+{"timestamp":"2026-02-19T18:27:02.527Z","action":"AGENT_REGISTERED","level":"INFO","message":"Agent chaotic_agent registered with domains: logic","agentId":"chaotic_agent","domainLabels":["logic"],"apiEndpoint":"http://localhost/agents/chaotic","skillScores":{"logic":10}}
+>> Testing chaos mode: null
+{"timestamp":"2026-02-19T18:27:02.528Z","action":"TASK_SUBMITTED","level":"INFO","message":"Task task_3334d0e9-4f0e-4c23-8575-fbf9217d6cda submitted to queue (Impact: 8)","taskId":"task_3334d0e9-4f0e-4c23-8575-fbf9217d6cda","domainLabel":"logic","priority":10,"predictedImpact":8}
+{"timestamp":"2026-02-19T18:27:02.529Z","action":"TASK_DISPATCHED","level":"INFO","message":"Dispatching task task_3334d0e9-4f0e-4c23-8575-fbf9217d6cda to agent chaotic_agent (Prob: 1)","taskId":"task_3334d0e9-4f0e-4c23-8575-fbf9217d6cda","agentId":"chaotic_agent","predictedSuccess":1}
+[CHAOS] Dispatching in mode: null
+{"timestamp":"2026-02-19T18:27:02.531Z","action":"TASK_FAILED","level":"ERROR","message":"Task task_3334d0e9-4f0e-4c23-8575-fbf9217d6cda failed by chaotic_agent","error":"Cannot read properties of null (reading 'confidenceScore')","stack":"TypeError: Cannot read properties of null (reading 'confidenceScore')\n    at CoreEngine.processQueue (file:///C:/Users/galan/LOC/src/engine/CoreEngine.js:370:24)\n    at async runEdgeCaseSimulation (file:///C:/Users/galan/LOC/tests/EdgeCaseSimulation.js:88:13)"}
+{"timestamp":"2026-02-19T18:27:02.533Z","action":"META_REFLECTION_UPDATE","level":"INFO","message":"Updated metadata for agent chaotic_agent in domain logic","agentId":"chaotic_agent","domain":"logic","successRate":"0.00","uncertainty":"0.50","confidence":"0.15"}
+{"timestamp":"2026-02-19T18:27:02.534Z","action":"TASK_REASSIGNMENT","level":"INFO","message":"Flagging task task_3334d0e9-4f0e-4c23-8575-fbf9217d6cda for reassignment (Retry 1/3)"}
+[STATUS] Task task_3334d0e9-4f0e-4c23-8575-fbf9217d6cda status: pending
+[OUTPUT] No output logged for task_3334d0e9-4f0e-4c23-8575-fbf9217d6cda
+>> Testing chaos mode: undefined
+{"timestamp":"2026-02-19T18:27:02.536Z","action":"TASK_SUBMITTED","level":"INFO","message":"Task task_147e8cbd-ce81-483e-9cc2-401f89e2e9db submitted to queue (Impact: 6)","taskId":"task_147e8cbd-ce81-483e-9cc2-401f89e2e9db","domainLabel":"logic","priority":10,"predictedImpact":6}
+{"timestamp":"2026-02-19T18:27:02.536Z","action":"TASK_DISPATCHED","level":"INFO","message":"Dispatching task task_3334d0e9-4f0e-4c23-8575-fbf9217d6cda to agent base_agent_0 (Prob: 0.9)","taskId":"task_3334d0e9-4f0e-4c23-8575-fbf9217d6cda","agentId":"base_agent_0","predictedSuccess":0.9}
+[CHAOS] Dispatching in mode: undefined
+{"timestamp":"2026-02-19T18:27:02.537Z","action":"TASK_FAILED","level":"ERROR","message":"Task task_3334d0e9-4f0e-4c23-8575-fbf9217d6cda failed by base_agent_0","error":"Cannot read properties of undefined (reading 'confidenceScore')","stack":"TypeError: Cannot read properties of undefined (reading 'confidenceScore')\n    at CoreEngine.processQueue (file:///C:/Users/galan/LOC/src/engine/CoreEngine.js:370:24)\n    at async runEdgeCaseSimulation (file:///C:/Users/galan/LOC/tests/EdgeCaseSimulation.js:88:13)"}
+{"timestamp":"2026-02-19T18:27:02.537Z","action":"META_REFLECTION_UPDATE","level":"INFO","message":"Updated metadata for agent base_agent_0 in domain logic","agentId":"base_agent_0","domain":"logic","successRate":"0.00","uncertainty":"0.50","confidence":"0.15"}
+{"timestamp":"2026-02-19T18:27:02.538Z","action":"TASK_REASSIGNMENT","level":"INFO","message":"Flagging task task_3334d0e9-4f0e-4c23-8575-fbf9217d6cda for reassignment (Retry 2/3)"}
+[STATUS] Task task_147e8cbd-ce81-483e-9cc2-401f89e2e9db status: pending
+[OUTPUT] No output logged for task_147e8cbd-ce81-483e-9cc2-401f89e2e9db
+>> Testing chaos mode: missing_fields
+{"timestamp":"2026-02-19T18:27:02.539Z","action":"TASK_SUBMITTED","level":"INFO","message":"Task task_4a9581b7-c732-4fb4-8b07-8ab84e23971a submitted to queue (Impact: 6)","taskId":"task_4a9581b7-c732-4fb4-8b07-8ab84e23971a","domainLabel":"logic","priority":10,"predictedImpact":6}
+{"timestamp":"2026-02-19T18:27:02.539Z","action":"LOW_PREDICTED_SUCCESS","level":"WARN","message":"Task task_3334d0e9-4f0e-4c23-8575-fbf9217d6cda has low predicted success (0.09). Applying strategy: COLLABORATE","taskId":"task_3334d0e9-4f0e-4c23-8575-fbf9217d6cda","agentId":"base_agent_1","strategy":"COLLABORATE"}
+{"timestamp":"2026-02-19T18:27:02.540Z","action":"META_REFLECTION_STRATEGY","level":"INFO","message":"Tagging task task_3334d0e9-4f0e-4c23-8575-fbf9217d6cda for agent collaboration","taskId":"task_3334d0e9-4f0e-4c23-8575-fbf9217d6cda"}
+{"timestamp":"2026-02-19T18:27:02.540Z","action":"TASK_DISPATCHED","level":"INFO","message":"Dispatching task task_3334d0e9-4f0e-4c23-8575-fbf9217d6cda to agent base_agent_1 (Prob: 0.09)","taskId":"task_3334d0e9-4f0e-4c23-8575-fbf9217d6cda","agentId":"base_agent_1","predictedSuccess":0.09}
+[CHAOS] Dispatching in mode: missing_fields
+{"timestamp":"2026-02-19T18:27:02.541Z","action":"META_REFLECTION_UPDATE","level":"INFO","message":"Updated metadata for agent base_agent_1 in domain logic","agentId":"base_agent_1","domain":"logic","successRate":"1.00","uncertainty":"0.50","confidence":"0.85"}
+{"timestamp":"2026-02-19T18:27:02.542Z","action":"TASK_EXECUTION_RECORD","taskId":"task_3334d0e9-4f0e-4c23-8575-fbf9217d6cda","agentId":"base_agent_1","domain":"logic","predictedImpact":8,"actualImpact":0,"confidenceScore":0,"executionTime":0,"dependencies":[],"collaboration":{"isCollaborative":true,"parentTaskId":null},"status":"completed"}
+{"timestamp":"2026-02-19T18:27:02.548Z","action":"TASK_COMPLETED","level":"INFO","message":"Task task_3334d0e9-4f0e-4c23-8575-fbf9217d6cda completed and logged","taskId":"task_3334d0e9-4f0e-4c23-8575-fbf9217d6cda","agentId":"base_agent_1","isSubtask":false,"parentTaskId":null}
+[STATUS] Task task_4a9581b7-c732-4fb4-8b07-8ab84e23971a status: pending
+[OUTPUT] No output logged for task_4a9581b7-c732-4fb4-8b07-8ab84e23971a
+>> Testing chaos mode: wrong_types
+{"timestamp":"2026-02-19T18:27:02.549Z","action":"TASK_SUBMITTED","level":"INFO","message":"Task task_0a8f587c-01e5-4de3-99b8-6afde9b80a96 submitted to queue (Impact: 6)","taskId":"task_0a8f587c-01e5-4de3-99b8-6afde9b80a96","domainLabel":"logic","priority":10,"predictedImpact":6}
+{"timestamp":"2026-02-19T18:27:02.550Z","action":"LOW_PREDICTED_SUCCESS","level":"WARN","message":"Task task_147e8cbd-ce81-483e-9cc2-401f89e2e9db has low predicted success (0.545). Applying strategy: COLLABORATE","taskId":"task_147e8cbd-ce81-483e-9cc2-401f89e2e9db","agentId":"base_agent_1","strategy":"COLLABORATE"}
+{"timestamp":"2026-02-19T18:27:02.550Z","action":"META_REFLECTION_STRATEGY","level":"INFO","message":"Tagging task task_147e8cbd-ce81-483e-9cc2-401f89e2e9db for agent collaboration","taskId":"task_147e8cbd-ce81-483e-9cc2-401f89e2e9db"}
+{"timestamp":"2026-02-19T18:27:02.551Z","action":"TASK_DISPATCHED","level":"INFO","message":"Dispatching task task_147e8cbd-ce81-483e-9cc2-401f89e2e9db to agent base_agent_1 (Prob: 0.545)","taskId":"task_147e8cbd-ce81-483e-9cc2-401f89e2e9db","agentId":"base_agent_1","predictedSuccess":0.545}
+[CHAOS] Dispatching in mode: wrong_types
+{"timestamp":"2026-02-19T18:27:02.551Z","action":"META_REFLECTION_UPDATE","level":"INFO","message":"Updated metadata for agent base_agent_1 in domain logic","agentId":"base_agent_1","domain":"logic","successRate":"1.00","uncertainty":"0.33","confidence":"0.90"}
+{"timestamp":"2026-02-19T18:27:02.552Z","action":"TASK_EXECUTION_RECORD","taskId":"task_147e8cbd-ce81-483e-9cc2-401f89e2e9db","agentId":"base_agent_1","domain":"logic","predictedImpact":6,"actualImpact":"big","confidenceScore":"high","executionTime":"long","dependencies":[],"collaboration":{"isCollaborative":true,"parentTaskId":null},"status":"completed"}
+{"timestamp":"2026-02-19T18:27:02.558Z","action":"TASK_COMPLETED","level":"INFO","message":"Task task_147e8cbd-ce81-483e-9cc2-401f89e2e9db completed and logged","taskId":"task_147e8cbd-ce81-483e-9cc2-401f89e2e9db","agentId":"base_agent_1","confidence":"high","isSubtask":false,"parentTaskId":null}
+[STATUS] Task task_0a8f587c-01e5-4de3-99b8-6afde9b80a96 status: pending
+[OUTPUT] No output logged for task_0a8f587c-01e5-4de3-99b8-6afde9b80a96
+>> Testing chaos mode: nan
+{"timestamp":"2026-02-19T18:27:02.558Z","action":"TASK_SUBMITTED","level":"INFO","message":"Task task_2e00567a-6f61-4af6-a7d5-1d0a612a22e9 submitted to queue (Impact: NaN)","taskId":"task_2e00567a-6f61-4af6-a7d5-1d0a612a22e9","domainLabel":"logic","priority":10,"predictedImpact":null}
+{"timestamp":"2026-02-19T18:27:02.559Z","action":"TASK_DISPATCHED","level":"INFO","message":"Dispatching task task_4a9581b7-c732-4fb4-8b07-8ab84e23971a to agent base_agent_1 (Prob: 0.6967)","taskId":"task_4a9581b7-c732-4fb4-8b07-8ab84e23971a","agentId":"base_agent_1","predictedSuccess":0.6967}
+[CHAOS] Dispatching in mode: nan
+{"timestamp":"2026-02-19T18:27:02.559Z","action":"META_REFLECTION_UPDATE","level":"INFO","message":"Updated metadata for agent base_agent_1 in domain logic","agentId":"base_agent_1","domain":"logic","successRate":"1.00","uncertainty":"0.25","confidence":"0.92"}
+{"timestamp":"2026-02-19T18:27:02.560Z","action":"TASK_EXECUTION_RECORD","taskId":"task_4a9581b7-c732-4fb4-8b07-8ab84e23971a","agentId":"base_agent_1","domain":"logic","predictedImpact":6,"actualImpact":0,"confidenceScore":0,"executionTime":0,"dependencies":[],"collaboration":{"isCollaborative":false,"parentTaskId":null},"status":"completed"}
+{"timestamp":"2026-02-19T18:27:02.568Z","action":"TASK_COMPLETED","level":"INFO","message":"Task task_4a9581b7-c732-4fb4-8b07-8ab84e23971a completed and logged","taskId":"task_4a9581b7-c732-4fb4-8b07-8ab84e23971a","agentId":"base_agent_1","confidence":null,"isSubtask":false,"parentTaskId":null}
+[STATUS] Task task_2e00567a-6f61-4af6-a7d5-1d0a612a22e9 status: pending
+[OUTPUT] No output logged for task_2e00567a-6f61-4af6-a7d5-1d0a612a22e9
+
+--- PHASE 3: DIRECT QUEUE CONTAMINATION ---
+>> Injecting toxic tasks directly into taskQueue...
+>> Processing queue with toxic tasks...
+{"timestamp":"2026-02-19T18:27:02.569Z","action":"TASK_DISPATCHED","level":"INFO","message":"Dispatching task task_0a8f587c-01e5-4de3-99b8-6afde9b80a96 to agent base_agent_1 (Prob: 0.7725)","taskId":"task_0a8f587c-01e5-4de3-99b8-6afde9b80a96","agentId":"base_agent_1","predictedSuccess":0.7725}
+[CHAOS] Dispatching in mode: nan
+{"timestamp":"2026-02-19T18:27:02.569Z","action":"META_REFLECTION_UPDATE","level":"INFO","message":"Updated metadata for agent base_agent_1 in domain logic","agentId":"base_agent_1","domain":"logic","successRate":"1.00","uncertainty":"0.20","confidence":"0.94"}
+{"timestamp":"2026-02-19T18:27:02.569Z","action":"TASK_EXECUTION_RECORD","taskId":"task_0a8f587c-01e5-4de3-99b8-6afde9b80a96","agentId":"base_agent_1","domain":"logic","predictedImpact":6,"actualImpact":0,"confidenceScore":0,"executionTime":0,"dependencies":[],"collaboration":{"isCollaborative":false,"parentTaskId":null},"status":"completed"}
+{"timestamp":"2026-02-19T18:27:02.575Z","action":"TASK_COMPLETED","level":"INFO","message":"Task task_0a8f587c-01e5-4de3-99b8-6afde9b80a96 completed and logged","taskId":"task_0a8f587c-01e5-4de3-99b8-6afde9b80a96","agentId":"base_agent_1","confidence":null,"isSubtask":false,"parentTaskId":null}
+{"timestamp":"2026-02-19T18:27:02.576Z","action":"TASK_DISPATCHED","level":"INFO","message":"Dispatching task task_2e00567a-6f61-4af6-a7d5-1d0a612a22e9 to agent base_agent_1 (Prob: 0.818)","taskId":"task_2e00567a-6f61-4af6-a7d5-1d0a612a22e9","agentId":"base_agent_1","predictedSuccess":0.818}
+[CHAOS] Dispatching in mode: nan
+{"timestamp":"2026-02-19T18:27:02.576Z","action":"META_REFLECTION_UPDATE","level":"INFO","message":"Updated metadata for agent base_agent_1 in domain logic","agentId":"base_agent_1","domain":"logic","successRate":"1.00","uncertainty":"0.17","confidence":"0.95"}
+{"timestamp":"2026-02-19T18:27:02.576Z","action":"TASK_EXECUTION_RECORD","taskId":"task_2e00567a-6f61-4af6-a7d5-1d0a612a22e9","agentId":"base_agent_1","domain":"logic","predictedImpact":0,"actualImpact":0,"confidenceScore":0,"executionTime":0,"dependencies":[],"collaboration":{"isCollaborative":false,"parentTaskId":null},"status":"completed"}
+{"timestamp":"2026-02-19T18:27:02.583Z","action":"TASK_COMPLETED","level":"INFO","message":"Task task_2e00567a-6f61-4af6-a7d5-1d0a612a22e9 completed and logged","taskId":"task_2e00567a-6f61-4af6-a7d5-1d0a612a22e9","agentId":"base_agent_1","confidence":null,"isSubtask":false,"parentTaskId":null}
+{"timestamp":"2026-02-19T18:27:02.584Z","action":"LOW_PREDICTED_SUCCESS","level":"WARN","message":"Task toxic_1 has low predicted success (0.1). Applying strategy: REROUTE","taskId":"toxic_1","agentId":"chaotic_agent","strategy":"REROUTE"}
+{"timestamp":"2026-02-19T18:27:02.584Z","action":"TASK_REROUTED","level":"INFO","message":"Task toxic_1 rerouted/delayed for better agent compatibility"}
+{"timestamp":"2026-02-19T18:27:02.585Z","action":"LOW_PREDICTED_SUCCESS","level":"WARN","message":"Task toxic_1 has low predicted success (0.1). Applying strategy: REROUTE","taskId":"toxic_1","agentId":"chaotic_agent","strategy":"REROUTE"}
+{"timestamp":"2026-02-19T18:27:02.585Z","action":"TASK_REROUTED","level":"INFO","message":"Task toxic_1 rerouted/delayed for better agent compatibility"}
+{"timestamp":"2026-02-19T18:27:02.586Z","action":"LOW_PREDICTED_SUCCESS","level":"WARN","message":"Task toxic_1 has low predicted success (0.1). Applying strategy: REROUTE","taskId":"toxic_1","agentId":"chaotic_agent","strategy":"REROUTE"}
+{"timestamp":"2026-02-19T18:27:02.586Z","action":"TASK_REROUTED","level":"INFO","message":"Task toxic_1 rerouted/delayed for better agent compatibility"}
+[OK] Engine survived toxic task processing.
+
+--- PHASE 4: VALID TASKS AMIDST CHAOS ---
+{"timestamp":"2026-02-19T18:27:02.586Z","action":"TASK_SUBMITTED","level":"INFO","message":"Task task_e899dbaf-3dba-447d-98b5-f53caeba5469 submitted to queue (Impact: 3.98)","taskId":"task_e899dbaf-3dba-447d-98b5-f53caeba5469","domainLabel":"analysis","priority":1,"predictedImpact":3.98}
+{"timestamp":"2026-02-19T18:27:02.587Z","action":"TASK_SUBMITTED","level":"INFO","message":"Task task_8ccf9ed6-bf3b-4975-b2ce-8feee3d38505 submitted to queue (Impact: 3.98)","taskId":"task_8ccf9ed6-bf3b-4975-b2ce-8feee3d38505","domainLabel":"analysis","priority":1,"predictedImpact":3.98}
+{"timestamp":"2026-02-19T18:27:02.587Z","action":"TASK_SUBMITTED","level":"INFO","message":"Task task_9aeb616e-8d95-4f2d-bd92-3884514f1ea6 submitted to queue (Impact: 3.98)","taskId":"task_9aeb616e-8d95-4f2d-bd92-3884514f1ea6","domainLabel":"analysis","priority":1,"predictedImpact":3.98}
+{"timestamp":"2026-02-19T18:27:02.587Z","action":"TASK_SUBMITTED","level":"INFO","message":"Task task_c6e3f243-702d-4488-8f68-eba4e010db53 submitted to queue (Impact: 3.98)","taskId":"task_c6e3f243-702d-4488-8f68-eba4e010db53","domainLabel":"analysis","priority":1,"predictedImpact":3.98}
+{"timestamp":"2026-02-19T18:27:02.588Z","action":"TASK_SUBMITTED","level":"INFO","message":"Task task_c88b5378-2eb1-4671-9f50-a027c3490671 submitted to queue (Impact: 3.98)","taskId":"task_c88b5378-2eb1-4671-9f50-a027c3490671","domainLabel":"analysis","priority":1,"predictedImpact":3.98}
+>> Processing remaining tasks...
+{"timestamp":"2026-02-19T18:27:02.589Z","action":"TASK_DISPATCHED","level":"INFO","message":"Dispatching task task_e899dbaf-3dba-447d-98b5-f53caeba5469 to agent base_agent_1 (Prob: 0.9)","taskId":"task_e899dbaf-3dba-447d-98b5-f53caeba5469","agentId":"base_agent_1","predictedSuccess":0.9}
+[CHAOS] Dispatching in mode: none
+{"timestamp":"2026-02-19T18:27:02.589Z","action":"META_REFLECTION_UPDATE","level":"INFO","message":"Updated metadata for agent base_agent_1 in domain analysis","agentId":"base_agent_1","domain":"analysis","successRate":"1.00","uncertainty":"0.50","confidence":"0.85"}
+{"timestamp":"2026-02-19T18:27:02.589Z","action":"TASK_EXECUTION_RECORD","taskId":"task_e899dbaf-3dba-447d-98b5-f53caeba5469","agentId":"base_agent_1","domain":"analysis","predictedImpact":3.98,"actualImpact":5,"confidenceScore":0.9,"executionTime":100,"dependencies":[],"collaboration":{"isCollaborative":false,"parentTaskId":null},"status":"completed"}
+{"timestamp":"2026-02-19T18:27:02.596Z","action":"TASK_COMPLETED","level":"INFO","message":"Task task_e899dbaf-3dba-447d-98b5-f53caeba5469 completed and logged","taskId":"task_e899dbaf-3dba-447d-98b5-f53caeba5469","agentId":"base_agent_1","confidence":0.9,"isSubtask":false,"parentTaskId":null}
+{"timestamp":"2026-02-19T18:27:02.597Z","action":"TASK_DISPATCHED","level":"INFO","message":"Dispatching task task_8ccf9ed6-bf3b-4975-b2ce-8feee3d38505 to agent base_agent_1 (Prob: 0.95)","taskId":"task_8ccf9ed6-bf3b-4975-b2ce-8feee3d38505","agentId":"base_agent_1","predictedSuccess":0.95}
+[CHAOS] Dispatching in mode: none
+{"timestamp":"2026-02-19T18:27:02.597Z","action":"META_REFLECTION_UPDATE","level":"INFO","message":"Updated metadata for agent base_agent_1 in domain analysis","agentId":"base_agent_1","domain":"analysis","successRate":"1.00","uncertainty":"0.33","confidence":"0.90"}
+{"timestamp":"2026-02-19T18:27:02.598Z","action":"TASK_EXECUTION_RECORD","taskId":"task_8ccf9ed6-bf3b-4975-b2ce-8feee3d38505","agentId":"base_agent_1","domain":"analysis","predictedImpact":3.98,"actualImpact":5,"confidenceScore":0.9,"executionTime":100,"dependencies":[],"collaboration":{"isCollaborative":false,"parentTaskId":null},"status":"completed"}
+{"timestamp":"2026-02-19T18:27:02.604Z","action":"TASK_COMPLETED","level":"INFO","message":"Task task_8ccf9ed6-bf3b-4975-b2ce-8feee3d38505 completed and logged","taskId":"task_8ccf9ed6-bf3b-4975-b2ce-8feee3d38505","agentId":"base_agent_1","confidence":0.9,"isSubtask":false,"parentTaskId":null}
+{"timestamp":"2026-02-19T18:27:02.605Z","action":"TASK_DISPATCHED","level":"INFO","message":"Dispatching task task_9aeb616e-8d95-4f2d-bd92-3884514f1ea6 to agent base_agent_1 (Prob: 0.9667)","taskId":"task_9aeb616e-8d95-4f2d-bd92-3884514f1ea6","agentId":"base_agent_1","predictedSuccess":0.9667}
+[CHAOS] Dispatching in mode: none
+{"timestamp":"2026-02-19T18:27:02.605Z","action":"META_REFLECTION_UPDATE","level":"INFO","message":"Updated metadata for agent base_agent_1 in domain analysis","agentId":"base_agent_1","domain":"analysis","successRate":"1.00","uncertainty":"0.25","confidence":"0.92"}
+{"timestamp":"2026-02-19T18:27:02.606Z","action":"TASK_EXECUTION_RECORD","taskId":"task_9aeb616e-8d95-4f2d-bd92-3884514f1ea6","agentId":"base_agent_1","domain":"analysis","predictedImpact":3.98,"actualImpact":5,"confidenceScore":0.9,"executionTime":100,"dependencies":[],"collaboration":{"isCollaborative":false,"parentTaskId":null},"status":"completed"}
+{"timestamp":"2026-02-19T18:27:02.612Z","action":"TASK_COMPLETED","level":"INFO","message":"Task task_9aeb616e-8d95-4f2d-bd92-3884514f1ea6 completed and logged","taskId":"task_9aeb616e-8d95-4f2d-bd92-3884514f1ea6","agentId":"base_agent_1","confidence":0.9,"isSubtask":false,"parentTaskId":null}
+{"timestamp":"2026-02-19T18:27:02.613Z","action":"TASK_DISPATCHED","level":"INFO","message":"Dispatching task task_c6e3f243-702d-4488-8f68-eba4e010db53 to agent base_agent_1 (Prob: 0.975)","taskId":"task_c6e3f243-702d-4488-8f68-eba4e010db53","agentId":"base_agent_1","predictedSuccess":0.975}
+[CHAOS] Dispatching in mode: none
+{"timestamp":"2026-02-19T18:27:02.613Z","action":"META_REFLECTION_UPDATE","level":"INFO","message":"Updated metadata for agent base_agent_1 in domain analysis","agentId":"base_agent_1","domain":"analysis","successRate":"1.00","uncertainty":"0.20","confidence":"0.94"}
+{"timestamp":"2026-02-19T18:27:02.613Z","action":"TASK_EXECUTION_RECORD","taskId":"task_c6e3f243-702d-4488-8f68-eba4e010db53","agentId":"base_agent_1","domain":"analysis","predictedImpact":3.98,"actualImpact":5,"confidenceScore":0.9,"executionTime":100,"dependencies":[],"collaboration":{"isCollaborative":false,"parentTaskId":null},"status":"completed"}
+{"timestamp":"2026-02-19T18:27:02.620Z","action":"TASK_COMPLETED","level":"INFO","message":"Task task_c6e3f243-702d-4488-8f68-eba4e010db53 completed and logged","taskId":"task_c6e3f243-702d-4488-8f68-eba4e010db53","agentId":"base_agent_1","confidence":0.9,"isSubtask":false,"parentTaskId":null}
+{"timestamp":"2026-02-19T18:27:02.621Z","action":"TASK_DISPATCHED","level":"INFO","message":"Dispatching task task_c88b5378-2eb1-4671-9f50-a027c3490671 to agent base_agent_1 (Prob: 0.98)","taskId":"task_c88b5378-2eb1-4671-9f50-a027c3490671","agentId":"base_agent_1","predictedSuccess":0.98}
+[CHAOS] Dispatching in mode: none
+{"timestamp":"2026-02-19T18:27:02.621Z","action":"META_REFLECTION_UPDATE","level":"INFO","message":"Updated metadata for agent base_agent_1 in domain analysis","agentId":"base_agent_1","domain":"analysis","successRate":"1.00","uncertainty":"0.17","confidence":"0.95"}
+{"timestamp":"2026-02-19T18:27:02.621Z","action":"TASK_EXECUTION_RECORD","taskId":"task_c88b5378-2eb1-4671-9f50-a027c3490671","agentId":"base_agent_1","domain":"analysis","predictedImpact":3.98,"actualImpact":5,"confidenceScore":0.9,"executionTime":100,"dependencies":[],"collaboration":{"isCollaborative":false,"parentTaskId":null},"status":"completed"}
+{"timestamp":"2026-02-19T18:27:02.627Z","action":"TASK_COMPLETED","level":"INFO","message":"Task task_c88b5378-2eb1-4671-9f50-a027c3490671 completed and logged","taskId":"task_c88b5378-2eb1-4671-9f50-a027c3490671","agentId":"base_agent_1","confidence":0.9,"isSubtask":false,"parentTaskId":null}
+{"timestamp":"2026-02-19T18:27:02.628Z","action":"LOW_PREDICTED_SUCCESS","level":"WARN","message":"Task toxic_1 has low predicted success (0.1). Applying strategy: REROUTE","taskId":"toxic_1","agentId":"chaotic_agent","strategy":"REROUTE"}
+{"timestamp":"2026-02-19T18:27:02.628Z","action":"TASK_REROUTED","level":"INFO","message":"Task toxic_1 rerouted/delayed for better agent compatibility"}
+{"timestamp":"2026-02-19T18:27:02.629Z","action":"LOW_PREDICTED_SUCCESS","level":"WARN","message":"Task toxic_1 has low predicted success (0.1). Applying strategy: REROUTE","taskId":"toxic_1","agentId":"chaotic_agent","strategy":"REROUTE"}
+{"timestamp":"2026-02-19T18:27:02.629Z","action":"TASK_REROUTED","level":"INFO","message":"Task toxic_1 rerouted/delayed for better agent compatibility"}
+{"timestamp":"2026-02-19T18:27:02.629Z","action":"LOW_PREDICTED_SUCCESS","level":"WARN","message":"Task toxic_1 has low predicted success (0.1). Applying strategy: REROUTE","taskId":"toxic_1","agentId":"chaotic_agent","strategy":"REROUTE"}
+{"timestamp":"2026-02-19T18:27:02.630Z","action":"TASK_REROUTED","level":"INFO","message":"Task toxic_1 rerouted/delayed for better agent compatibility"}
+{"timestamp":"2026-02-19T18:27:02.630Z","action":"LOW_PREDICTED_SUCCESS","level":"WARN","message":"Task toxic_1 has low predicted success (0.1). Applying strategy: REROUTE","taskId":"toxic_1","agentId":"chaotic_agent","strategy":"REROUTE"}
+{"timestamp":"2026-02-19T18:27:02.630Z","action":"TASK_REROUTED","level":"INFO","message":"Task toxic_1 rerouted/delayed for better agent compatibility"}
+{"timestamp":"2026-02-19T18:27:02.631Z","action":"LOW_PREDICTED_SUCCESS","level":"WARN","message":"Task toxic_1 has low predicted success (0.1). Applying strategy: REROUTE","taskId":"toxic_1","agentId":"chaotic_agent","strategy":"REROUTE"}
+{"timestamp":"2026-02-19T18:27:02.631Z","action":"TASK_REROUTED","level":"INFO","message":"Task toxic_1 rerouted/delayed for better agent compatibility"}
+{"timestamp":"2026-02-19T18:27:02.632Z","action":"LOW_PREDICTED_SUCCESS","level":"WARN","message":"Task toxic_1 has low predicted success (0.1). Applying strategy: REROUTE","taskId":"toxic_1","agentId":"chaotic_agent","strategy":"REROUTE"}
+{"timestamp":"2026-02-19T18:27:02.632Z","action":"TASK_REROUTED","level":"INFO","message":"Task toxic_1 rerouted/delayed for better agent compatibility"}
+{"timestamp":"2026-02-19T18:27:02.632Z","action":"LOW_PREDICTED_SUCCESS","level":"WARN","message":"Task toxic_1 has low predicted success (0.1). Applying strategy: REROUTE","taskId":"toxic_1","agentId":"chaotic_agent","strategy":"REROUTE"}
+{"timestamp":"2026-02-19T18:27:02.633Z","action":"TASK_REROUTED","level":"INFO","message":"Task toxic_1 rerouted/delayed for better agent compatibility"}
+{"timestamp":"2026-02-19T18:27:02.633Z","action":"LOW_PREDICTED_SUCCESS","level":"WARN","message":"Task toxic_1 has low predicted success (0.1). Applying strategy: REROUTE","taskId":"toxic_1","agentId":"chaotic_agent","strategy":"REROUTE"}
+{"timestamp":"2026-02-19T18:27:02.633Z","action":"TASK_REROUTED","level":"INFO","message":"Task toxic_1 rerouted/delayed for better agent compatibility"}
+{"timestamp":"2026-02-19T18:27:02.634Z","action":"LOW_PREDICTED_SUCCESS","level":"WARN","message":"Task toxic_1 has low predicted success (0.1). Applying strategy: REROUTE","taskId":"toxic_1","agentId":"chaotic_agent","strategy":"REROUTE"}
+{"timestamp":"2026-02-19T18:27:02.634Z","action":"TASK_REROUTED","level":"INFO","message":"Task toxic_1 rerouted/delayed for better agent compatibility"}
+{"timestamp":"2026-02-19T18:27:02.634Z","action":"LOW_PREDICTED_SUCCESS","level":"WARN","message":"Task toxic_1 has low predicted success (0.1). Applying strategy: REROUTE","taskId":"toxic_1","agentId":"chaotic_agent","strategy":"REROUTE"}
+{"timestamp":"2026-02-19T18:27:02.635Z","action":"TASK_REROUTED","level":"INFO","message":"Task toxic_1 rerouted/delayed for better agent compatibility"}
+{"timestamp":"2026-02-19T18:27:02.635Z","action":"LOW_PREDICTED_SUCCESS","level":"WARN","message":"Task toxic_1 has low predicted success (0.1). Applying strategy: REROUTE","taskId":"toxic_1","agentId":"chaotic_agent","strategy":"REROUTE"}
+{"timestamp":"2026-02-19T18:27:02.635Z","action":"TASK_REROUTED","level":"INFO","message":"Task toxic_1 rerouted/delayed for better agent compatibility"}
+{"timestamp":"2026-02-19T18:27:02.636Z","action":"LOW_PREDICTED_SUCCESS","level":"WARN","message":"Task toxic_1 has low predicted success (0.1). Applying strategy: REROUTE","taskId":"toxic_1","agentId":"chaotic_agent","strategy":"REROUTE"}
+{"timestamp":"2026-02-19T18:27:02.636Z","action":"TASK_REROUTED","level":"INFO","message":"Task toxic_1 rerouted/delayed for better agent compatibility"}
+{"timestamp":"2026-02-19T18:27:02.636Z","action":"LOW_PREDICTED_SUCCESS","level":"WARN","message":"Task toxic_1 has low predicted success (0.1). Applying strategy: REROUTE","taskId":"toxic_1","agentId":"chaotic_agent","strategy":"REROUTE"}
+{"timestamp":"2026-02-19T18:27:02.636Z","action":"TASK_REROUTED","level":"INFO","message":"Task toxic_1 rerouted/delayed for better agent compatibility"}
+{"timestamp":"2026-02-19T18:27:02.637Z","action":"LOW_PREDICTED_SUCCESS","level":"WARN","message":"Task toxic_1 has low predicted success (0.1). Applying strategy: REROUTE","taskId":"toxic_1","agentId":"chaotic_agent","strategy":"REROUTE"}
+{"timestamp":"2026-02-19T18:27:02.637Z","action":"TASK_REROUTED","level":"INFO","message":"Task toxic_1 rerouted/delayed for better agent compatibility"}
+{"timestamp":"2026-02-19T18:27:02.637Z","action":"LOW_PREDICTED_SUCCESS","level":"WARN","message":"Task toxic_1 has low predicted success (0.1). Applying strategy: REROUTE","taskId":"toxic_1","agentId":"chaotic_agent","strategy":"REROUTE"}
+{"timestamp":"2026-02-19T18:27:02.638Z","action":"TASK_REROUTED","level":"INFO","message":"Task toxic_1 rerouted/delayed for better agent compatibility"}
+Simulation finished. Completed: 10, Failed: 0
+[EVALUATION] SUCCESS: Engine processed valid tasks after recovering from/ignoring edge cases.
+
+--- LOG REVIEW (Summary) ---
+Toxic Task 1 Status: pending
+Toxic Task 3 Status: pending
