@@ -1,0 +1,88 @@
+﻿{"timestamp":"2026-02-19T18:18:29.055Z","action":"SIMULATION_START","level":"INFO","message":"Starting Shared Resource Competition Simulation"}
+{"timestamp":"2026-02-19T18:18:29.069Z","action":"ENGINE_INIT","level":"INFO","message":"Core Engine initialized successfully"}
+{"timestamp":"2026-02-19T18:18:29.070Z","action":"RESOURCE_REGISTERED","level":"INFO","message":"Resource PRIMARY_API registered (exclusive, capacity: 1)","id":"PRIMARY_API","type":"exclusive","capacity":1}
+{"timestamp":"2026-02-19T18:18:29.070Z","action":"RESOURCE_REGISTERED","level":"INFO","message":"Resource COMPUTE_CLUSTER registered (parallel, capacity: 2)","id":"COMPUTE_CLUSTER","type":"parallel","capacity":2}
+{"timestamp":"2026-02-19T18:18:29.071Z","action":"AGENT_REGISTERED","level":"INFO","message":"Agent Agent_A registered with domains: data-collection","agentId":"Agent_A","domainLabels":["data-collection"],"apiEndpoint":"http://agent-a/api","skillScores":{"data-collection":9}}
+{"timestamp":"2026-02-19T18:18:29.072Z","action":"AGENT_REGISTERED","level":"INFO","message":"Agent Agent_B registered with domains: data-collection","agentId":"Agent_B","domainLabels":["data-collection"],"apiEndpoint":"http://agent-b/api","skillScores":{"data-collection":8}}
+{"timestamp":"2026-02-19T18:18:29.073Z","action":"AGENT_REGISTERED","level":"INFO","message":"Agent Agent_C registered with domains: data-collection","agentId":"Agent_C","domainLabels":["data-collection"],"apiEndpoint":"http://agent-c/api","skillScores":{"data-collection":8}}
+{"timestamp":"2026-02-19T18:18:29.074Z","action":"TASK_SUBMITTED","level":"INFO","message":"Task task_758e4456-003d-4201-8280-00768e429e03 submitted to queue (Impact: 6.5)","taskId":"task_758e4456-003d-4201-8280-00768e429e03","domainLabel":"data-collection","priority":5,"predictedImpact":6.5}
+{"timestamp":"2026-02-19T18:18:29.074Z","action":"TASK_SUBMITTED","level":"INFO","message":"Task task_5a63c90f-4d53-4724-87bd-167bb1871108 submitted to queue (Impact: 6.32)","taskId":"task_5a63c90f-4d53-4724-87bd-167bb1871108","domainLabel":"data-collection","priority":8,"predictedImpact":6.32}
+{"timestamp":"2026-02-19T18:18:29.075Z","action":"TASK_SUBMITTED","level":"INFO","message":"Task task_8f948cc1-60cb-4e3e-b817-3c7a5265d8c0 submitted to queue (Impact: 7.4)","taskId":"task_8f948cc1-60cb-4e3e-b817-3c7a5265d8c0","domainLabel":"data-collection","priority":5,"predictedImpact":7.4}
+{"timestamp":"2026-02-19T18:18:29.076Z","action":"TASK_SUBMITTED","level":"INFO","message":"Task task_03a8fcc3-1c3b-4049-91ef-89c03145af78 submitted to queue (Impact: 7.4)","taskId":"task_03a8fcc3-1c3b-4049-91ef-89c03145af78","domainLabel":"data-collection","priority":5,"predictedImpact":7.4}
+{"timestamp":"2026-02-19T18:18:29.076Z","action":"TASK_SUBMITTED","level":"INFO","message":"Task task_849b045f-56e2-4005-bf08-7b394dc557e6 submitted to queue (Impact: 7.4)","taskId":"task_849b045f-56e2-4005-bf08-7b394dc557e6","domainLabel":"data-collection","priority":5,"predictedImpact":7.4}
+{"timestamp":"2026-02-19T18:18:29.077Z","action":"TASKS_SUBMITTED","level":"INFO","message":"Resource-dependent tasks submitted."}
+{"timestamp":"2026-02-19T18:18:29.077Z","action":"LOOP_STARTED","level":"INFO","message":"Execution loop started","intervalMs":500}
+{"timestamp":"2026-02-19T18:18:29.590Z","action":"RESOURCE_LOCKED","level":"INFO","message":"Task task_5a63c90f-4d53-4724-87bd-167bb1871108 locked resource PRIMARY_API (exclusive)","taskId":"task_5a63c90f-4d53-4724-87bd-167bb1871108","resId":"PRIMARY_API","usage":1}
+{"timestamp":"2026-02-19T18:18:29.592Z","action":"TASK_DISPATCHED","level":"INFO","message":"Dispatching task task_5a63c90f-4d53-4724-87bd-167bb1871108 to agent Agent_A (Prob: 0.9)","taskId":"task_5a63c90f-4d53-4724-87bd-167bb1871108","agentId":"Agent_A","predictedSuccess":0.9}
+
+--- Status Update ---
+Active Tasks: 1
+ - [task_5a63c90f-4d53-4724-87bd-167bb1871108] Secondary API Update (Assigned to Agent_A)
+Pending Tasks: 4
+ - [task_8f948cc1-60cb-4e3e-b817-3c7a5265d8c0] Parallel Compute Job A
+ - [task_03a8fcc3-1c3b-4049-91ef-89c03145af78] Parallel Compute Job B
+ - [task_849b045f-56e2-4005-bf08-7b394dc557e6] Delayed Compute Job C
+ - [task_758e4456-003d-4201-8280-00768e429e03] Heavy API Data Fetch
+Resource Usage:
+ - PRIMARY_API: 1/1 (Locked by: task_5a63c90f-4d53-4724-87bd-167bb1871108)
+ - COMPUTE_CLUSTER: 0/2 (Locked by: None)
+{"timestamp":"2026-02-19T18:18:30.099Z","action":"META_REFLECTION_UPDATE","level":"INFO","message":"Updated metadata for agent Agent_A in domain data-collection","agentId":"Agent_A","domain":"data-collection","successRate":"1.00","uncertainty":"0.50","confidence":"0.85"}
+{"timestamp":"2026-02-19T18:18:30.100Z","action":"TASK_EXECUTION_RECORD","taskId":"task_5a63c90f-4d53-4724-87bd-167bb1871108","agentId":"Agent_A","domain":"data-collection","predictedImpact":6.32,"actualImpact":7.1,"confidenceScore":0.86,"executionTime":150,"dependencies":[],"collaboration":{"isCollaborative":false,"parentTaskId":null},"status":"completed"}
+{"timestamp":"2026-02-19T18:18:30.110Z","action":"RESOURCE_RELEASED","level":"INFO","message":"Task task_5a63c90f-4d53-4724-87bd-167bb1871108 released resource PRIMARY_API","taskId":"task_5a63c90f-4d53-4724-87bd-167bb1871108","resId":"PRIMARY_API","usage":0}
+{"timestamp":"2026-02-19T18:18:30.111Z","action":"TASK_COMPLETED","level":"INFO","message":"Task task_5a63c90f-4d53-4724-87bd-167bb1871108 completed and logged","taskId":"task_5a63c90f-4d53-4724-87bd-167bb1871108","agentId":"Agent_A","confidence":0.86,"isSubtask":false,"parentTaskId":null}
+{"timestamp":"2026-02-19T18:18:30.113Z","action":"RESOURCE_LOCKED","level":"INFO","message":"Task task_8f948cc1-60cb-4e3e-b817-3c7a5265d8c0 locked resource COMPUTE_CLUSTER (parallel)","taskId":"task_8f948cc1-60cb-4e3e-b817-3c7a5265d8c0","resId":"COMPUTE_CLUSTER","usage":1}
+{"timestamp":"2026-02-19T18:18:30.114Z","action":"TASK_DISPATCHED","level":"INFO","message":"Dispatching task task_8f948cc1-60cb-4e3e-b817-3c7a5265d8c0 to agent Agent_A (Prob: 0.95)","taskId":"task_8f948cc1-60cb-4e3e-b817-3c7a5265d8c0","agentId":"Agent_A","predictedSuccess":0.95}
+{"timestamp":"2026-02-19T18:18:30.615Z","action":"META_REFLECTION_UPDATE","level":"INFO","message":"Updated metadata for agent Agent_A in domain data-collection","agentId":"Agent_A","domain":"data-collection","successRate":"1.00","uncertainty":"0.33","confidence":"0.90"}
+{"timestamp":"2026-02-19T18:18:30.616Z","action":"TASK_EXECUTION_RECORD","taskId":"task_8f948cc1-60cb-4e3e-b817-3c7a5265d8c0","agentId":"Agent_A","domain":"data-collection","predictedImpact":7.4,"actualImpact":8.7,"confidenceScore":0.85,"executionTime":150,"dependencies":[],"collaboration":{"isCollaborative":false,"parentTaskId":null},"status":"completed"}
+{"timestamp":"2026-02-19T18:18:30.624Z","action":"RESOURCE_RELEASED","level":"INFO","message":"Task task_8f948cc1-60cb-4e3e-b817-3c7a5265d8c0 released resource COMPUTE_CLUSTER","taskId":"task_8f948cc1-60cb-4e3e-b817-3c7a5265d8c0","resId":"COMPUTE_CLUSTER","usage":0}
+{"timestamp":"2026-02-19T18:18:30.624Z","action":"TASK_COMPLETED","level":"INFO","message":"Task task_8f948cc1-60cb-4e3e-b817-3c7a5265d8c0 completed and logged","taskId":"task_8f948cc1-60cb-4e3e-b817-3c7a5265d8c0","agentId":"Agent_A","confidence":0.85,"isSubtask":false,"parentTaskId":null}
+{"timestamp":"2026-02-19T18:18:30.625Z","action":"RESOURCE_LOCKED","level":"INFO","message":"Task task_03a8fcc3-1c3b-4049-91ef-89c03145af78 locked resource COMPUTE_CLUSTER (parallel)","taskId":"task_03a8fcc3-1c3b-4049-91ef-89c03145af78","resId":"COMPUTE_CLUSTER","usage":1}
+{"timestamp":"2026-02-19T18:18:30.625Z","action":"TASK_DISPATCHED","level":"INFO","message":"Dispatching task task_03a8fcc3-1c3b-4049-91ef-89c03145af78 to agent Agent_A (Prob: 0.9667)","taskId":"task_03a8fcc3-1c3b-4049-91ef-89c03145af78","agentId":"Agent_A","predictedSuccess":0.9667}
+
+--- Status Update ---
+Active Tasks: 1
+ - [task_03a8fcc3-1c3b-4049-91ef-89c03145af78] Parallel Compute Job B (Assigned to Agent_A)
+Pending Tasks: 2
+ - [task_849b045f-56e2-4005-bf08-7b394dc557e6] Delayed Compute Job C
+ - [task_758e4456-003d-4201-8280-00768e429e03] Heavy API Data Fetch
+Resource Usage:
+ - PRIMARY_API: 0/1 (Locked by: None)
+ - COMPUTE_CLUSTER: 1/2 (Locked by: None)
+{"timestamp":"2026-02-19T18:18:31.129Z","action":"META_REFLECTION_UPDATE","level":"INFO","message":"Updated metadata for agent Agent_A in domain data-collection","agentId":"Agent_A","domain":"data-collection","successRate":"1.00","uncertainty":"0.25","confidence":"0.92"}
+{"timestamp":"2026-02-19T18:18:31.131Z","action":"TASK_EXECUTION_RECORD","taskId":"task_03a8fcc3-1c3b-4049-91ef-89c03145af78","agentId":"Agent_A","domain":"data-collection","predictedImpact":7.4,"actualImpact":6.9,"confidenceScore":0.8,"executionTime":150,"dependencies":[],"collaboration":{"isCollaborative":false,"parentTaskId":null},"status":"completed"}
+{"timestamp":"2026-02-19T18:18:31.146Z","action":"RESOURCE_RELEASED","level":"INFO","message":"Task task_03a8fcc3-1c3b-4049-91ef-89c03145af78 released resource COMPUTE_CLUSTER","taskId":"task_03a8fcc3-1c3b-4049-91ef-89c03145af78","resId":"COMPUTE_CLUSTER","usage":0}
+{"timestamp":"2026-02-19T18:18:31.147Z","action":"TASK_COMPLETED","level":"INFO","message":"Task task_03a8fcc3-1c3b-4049-91ef-89c03145af78 completed and logged","taskId":"task_03a8fcc3-1c3b-4049-91ef-89c03145af78","agentId":"Agent_A","confidence":0.8,"isSubtask":false,"parentTaskId":null}
+{"timestamp":"2026-02-19T18:18:31.148Z","action":"RESOURCE_LOCKED","level":"INFO","message":"Task task_849b045f-56e2-4005-bf08-7b394dc557e6 locked resource COMPUTE_CLUSTER (parallel)","taskId":"task_849b045f-56e2-4005-bf08-7b394dc557e6","resId":"COMPUTE_CLUSTER","usage":1}
+{"timestamp":"2026-02-19T18:18:31.149Z","action":"TASK_DISPATCHED","level":"INFO","message":"Dispatching task task_849b045f-56e2-4005-bf08-7b394dc557e6 to agent Agent_A (Prob: 0.975)","taskId":"task_849b045f-56e2-4005-bf08-7b394dc557e6","agentId":"Agent_A","predictedSuccess":0.975}
+{"timestamp":"2026-02-19T18:18:31.649Z","action":"META_REFLECTION_UPDATE","level":"INFO","message":"Updated metadata for agent Agent_A in domain data-collection","agentId":"Agent_A","domain":"data-collection","successRate":"1.00","uncertainty":"0.20","confidence":"0.94"}
+{"timestamp":"2026-02-19T18:18:31.650Z","action":"TASK_EXECUTION_RECORD","taskId":"task_849b045f-56e2-4005-bf08-7b394dc557e6","agentId":"Agent_A","domain":"data-collection","predictedImpact":7.4,"actualImpact":7.4,"confidenceScore":0.79,"executionTime":150,"dependencies":[],"collaboration":{"isCollaborative":false,"parentTaskId":null},"status":"completed"}
+{"timestamp":"2026-02-19T18:18:31.661Z","action":"RESOURCE_RELEASED","level":"INFO","message":"Task task_849b045f-56e2-4005-bf08-7b394dc557e6 released resource COMPUTE_CLUSTER","taskId":"task_849b045f-56e2-4005-bf08-7b394dc557e6","resId":"COMPUTE_CLUSTER","usage":0}
+{"timestamp":"2026-02-19T18:18:31.662Z","action":"TASK_COMPLETED","level":"INFO","message":"Task task_849b045f-56e2-4005-bf08-7b394dc557e6 completed and logged","taskId":"task_849b045f-56e2-4005-bf08-7b394dc557e6","agentId":"Agent_A","confidence":0.79,"isSubtask":false,"parentTaskId":null}
+{"timestamp":"2026-02-19T18:18:31.663Z","action":"RESOURCE_LOCKED","level":"INFO","message":"Task task_758e4456-003d-4201-8280-00768e429e03 locked resource PRIMARY_API (exclusive)","taskId":"task_758e4456-003d-4201-8280-00768e429e03","resId":"PRIMARY_API","usage":1}
+{"timestamp":"2026-02-19T18:18:31.664Z","action":"TASK_DISPATCHED","level":"INFO","message":"Dispatching task task_758e4456-003d-4201-8280-00768e429e03 to agent Agent_A (Prob: 0.98)","taskId":"task_758e4456-003d-4201-8280-00768e429e03","agentId":"Agent_A","predictedSuccess":0.98}
+
+--- Status Update ---
+Active Tasks: 1
+ - [task_758e4456-003d-4201-8280-00768e429e03] Heavy API Data Fetch (Assigned to Agent_A)
+Pending Tasks: 0
+Resource Usage:
+ - PRIMARY_API: 1/1 (Locked by: task_758e4456-003d-4201-8280-00768e429e03)
+ - COMPUTE_CLUSTER: 0/2 (Locked by: None)
+{"timestamp":"2026-02-19T18:18:32.180Z","action":"META_REFLECTION_UPDATE","level":"INFO","message":"Updated metadata for agent Agent_A in domain data-collection","agentId":"Agent_A","domain":"data-collection","successRate":"1.00","uncertainty":"0.17","confidence":"0.95"}
+{"timestamp":"2026-02-19T18:18:32.181Z","action":"TASK_EXECUTION_RECORD","taskId":"task_758e4456-003d-4201-8280-00768e429e03","agentId":"Agent_A","domain":"data-collection","predictedImpact":6.5,"actualImpact":6.3,"confidenceScore":0.89,"executionTime":150,"dependencies":[],"collaboration":{"isCollaborative":false,"parentTaskId":null},"status":"completed"}
+{"timestamp":"2026-02-19T18:18:32.192Z","action":"RESOURCE_RELEASED","level":"INFO","message":"Task task_758e4456-003d-4201-8280-00768e429e03 released resource PRIMARY_API","taskId":"task_758e4456-003d-4201-8280-00768e429e03","resId":"PRIMARY_API","usage":0}
+{"timestamp":"2026-02-19T18:18:32.193Z","action":"TASK_COMPLETED","level":"INFO","message":"Task task_758e4456-003d-4201-8280-00768e429e03 completed and logged","taskId":"task_758e4456-003d-4201-8280-00768e429e03","agentId":"Agent_A","confidence":0.89,"isSubtask":false,"parentTaskId":null}
+
+--- Status Update ---
+Active Tasks: 0
+Pending Tasks: 0
+Resource Usage:
+ - PRIMARY_API: 0/1 (Locked by: None)
+ - COMPUTE_CLUSTER: 0/2 (Locked by: None)
+{"timestamp":"2026-02-19T18:18:34.140Z","action":"SIMULATION_DONE","level":"INFO","message":"All tasks processed. Final states check:"}
+Task task_5a63c90f-4d53-4724-87bd-167bb1871108 completed with status: completed
+Task task_8f948cc1-60cb-4e3e-b817-3c7a5265d8c0 completed with status: completed
+Task task_03a8fcc3-1c3b-4049-91ef-89c03145af78 completed with status: completed
+Task task_849b045f-56e2-4005-bf08-7b394dc557e6 completed with status: completed
+Task task_758e4456-003d-4201-8280-00768e429e03 completed with status: completed
+{"timestamp":"2026-02-19T18:18:34.142Z","action":"LOOP_STOPPED","level":"INFO","message":"Execution loop stopped"}

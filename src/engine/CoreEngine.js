@@ -41,6 +41,12 @@ class CoreEngine {
         this.collaborationSpace = {};
 
         /**
+         * Shared resource pool (APIs, compute nodes, tools)
+         * @type {Object.<string, Object>}
+         */
+        this.resources = {};
+
+        /**
          * Reference to the execution loop timer
          */
         this.executionTimer = null;
@@ -122,6 +128,23 @@ class CoreEngine {
     }
 
     /**
+     * Registers a shared resource in the system
+     * @param {string} id Unique resource ID
+     * @param {string} type 'exclusive' | 'shared'
+     * @param {number} capacity Maximum parallel users (only for 'shared')
+     */
+    registerResource(id, type, capacity = 1) {
+        this.resources[id] = {
+            id,
+            type,
+            capacity,
+            currentUsage: 0,
+            lockedBy: null // Only for exclusive
+        };
+        logger.info('RESOURCE_REGISTERED', `Resource ${id} registered (${type}, capacity: ${capacity})`, { id, type, capacity });
+    }
+
+    /**
      * Submits a new task to the queue
      * @param {Object} taskData Details of the task
      * @returns {string} The submitted Task ID
@@ -144,6 +167,7 @@ class CoreEngine {
             retryCount: 0,
             failedAgents: [],
             dependencies: taskData.dependencies || [],
+            resourceRequirements: taskData.resourceRequirements || {}, // e.g. { 'API_NODE': 'exclusive' }
             subtasks: [], // Store IDs of subtasks
             parentTaskId: taskData.parentTaskId || null
         };
@@ -263,6 +287,26 @@ class CoreEngine {
                 if (!allDepsMet) return false;
             }
 
+            // Resource availability check
+            if (t.resourceRequirements) {
+                for (const [resId, reqType] of Object.entries(t.resourceRequirements)) {
+                    const res = this.resources[resId];
+                    if (!res) {
+                        logger.warn('RESOURCE_MISSING', `Task ${t.id} requires missing resource ${resId}`);
+                        return false;
+                    }
+                    if (reqType === 'exclusive' && (res.currentUsage > 0 || res.lockedBy)) {
+                        return false; // Resource busy
+                    }
+                    if (reqType === 'parallel' && res.type === 'exclusive' && res.lockedBy) {
+                        return false; // Exclusive lock exists
+                    }
+                    if (reqType === 'parallel' && res.currentUsage >= res.capacity) {
+                        return false; // Capacity reached
+                    }
+                }
+            }
+
             return true;
         });
 
@@ -291,6 +335,18 @@ class CoreEngine {
                 // Return to queue, effectively waiting for a more suitable agent or state
                 logger.info('TASK_REROUTED', `Task ${nextTask.id} rerouted/delayed for better agent compatibility`);
                 return;
+            }
+        }
+
+        // Lock resources
+        if (nextTask.resourceRequirements) {
+            for (const [resId, reqType] of Object.entries(nextTask.resourceRequirements)) {
+                const res = this.resources[resId];
+                res.currentUsage += 1;
+                if (reqType === 'exclusive') {
+                    res.lockedBy = nextTask.id;
+                }
+                logger.info('RESOURCE_LOCKED', `Task ${nextTask.id} locked resource ${resId} (${reqType})`, { taskId: nextTask.id, resId, usage: res.currentUsage });
             }
         }
 
@@ -554,6 +610,20 @@ class CoreEngine {
             task.status = 'failed';
             logger.error('TASK_ABORTED', `Task ${task.id} aborted after multiple reassignment attempts. Reason: ${reason}`);
         }
+
+        // Release resources on failure
+        if (task.resourceRequirements) {
+            for (const [resId, reqType] of Object.entries(task.resourceRequirements)) {
+                const res = this.resources[resId];
+                if (res) {
+                    res.currentUsage = Math.max(0, res.currentUsage - 1);
+                    if (reqType === 'exclusive') {
+                        res.lockedBy = null;
+                    }
+                    logger.info('RESOURCE_RELEASED_ON_FAILURE', `Task ${task.id} released resource ${resId} due to failure`, { taskId: task.id, resId });
+                }
+            }
+        }
     }
 
     /**
@@ -709,6 +779,20 @@ class CoreEngine {
             // If this was a subtask, notify the parent and check for aggregation
             if (task.parentTaskId) {
                 this.checkAndAggregateParent(task.parentTaskId);
+            }
+
+            // Release resources
+            if (task.resourceRequirements) {
+                for (const [resId, reqType] of Object.entries(task.resourceRequirements)) {
+                    const res = this.resources[resId];
+                    if (res) {
+                        res.currentUsage = Math.max(0, res.currentUsage - 1);
+                        if (reqType === 'exclusive') {
+                            res.lockedBy = null;
+                        }
+                        logger.info('RESOURCE_RELEASED', `Task ${taskId} released resource ${resId}`, { taskId, resId, usage: res.currentUsage });
+                    }
+                }
             }
         }
 
@@ -897,6 +981,20 @@ class CoreEngine {
             });
 
             logger.error('TASK_ABORTED', `Task ${task.id} failed after maximum retries.`);
+        }
+
+        // Release resources on failure
+        if (task.resourceRequirements) {
+            for (const [resId, reqType] of Object.entries(task.resourceRequirements)) {
+                const res = this.resources[resId];
+                if (res) {
+                    res.currentUsage = Math.max(0, res.currentUsage - 1);
+                    if (reqType === 'exclusive') {
+                        res.lockedBy = null;
+                    }
+                    logger.info('RESOURCE_RELEASED_ON_FAILURE', `Task ${task.id} released resource ${resId} due to failure`, { taskId: task.id, resId });
+                }
+            }
         }
     }
 
