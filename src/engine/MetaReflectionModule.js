@@ -130,6 +130,35 @@ class MetaReflectionModule {
     }
 
     /**
+     * Estimates the potential impact of a task based on complexity, priority, and historical data.
+     * @param {Object} task 
+     * @returns {number} Estimated impact score
+     */
+    predictImpact(task) {
+        const baseImpact = task.complexityScore || 5;
+        const priorityMultiplier = 1 + ((task.priority || 1) / 10);
+
+        // Get average impact for this domain from all agents who have worked on it
+        let domainImpactSum = 0;
+        let domainTaskCount = 0;
+
+        for (const agent of Object.values(this.core.agents)) {
+            const dPerf = agent.performanceData?.domains?.[task.domainLabel];
+            if (dPerf && dPerf.tasksCompleted > 0) {
+                domainImpactSum += (dPerf.averageImpact * dPerf.tasksCompleted);
+                domainTaskCount += dPerf.tasksCompleted;
+            }
+        }
+
+        const avgDomainImpact = domainTaskCount > 0 ? (domainImpactSum / domainTaskCount) : 5;
+
+        // Heuristic: 60% base(complexity/priority), 40% historical domain average
+        const predictedImpact = (baseImpact * priorityMultiplier * 0.6) + (avgDomainImpact * 0.4);
+
+        return parseFloat(predictedImpact.toFixed(2));
+    }
+
+    /**
      * Determines best course of action when predicted success is low.
      * @param {Object} task 
      * @param {number} predictedSuccess 

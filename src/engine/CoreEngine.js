@@ -148,13 +148,23 @@ class CoreEngine {
             parentTaskId: taskData.parentTaskId || null
         };
 
-        this.taskQueue.push(task);
-        this.taskQueue.sort((a, b) => (b.priority || 1) - (a.priority || 1));
+        // Predictive Impact Calculation
+        task.predictedImpact = this.metaReflection.predictImpact(task);
 
-        logger.info('TASK_SUBMITTED', `Task ${taskId} submitted to queue`, {
+        this.taskQueue.push(task);
+
+        // Prioritize by Priority first, then Predicted Impact
+        this.taskQueue.sort((a, b) => {
+            const priorityDiff = (b.priority || 1) - (a.priority || 1);
+            if (priorityDiff !== 0) return priorityDiff;
+            return (b.predictedImpact || 0) - (a.predictedImpact || 0);
+        });
+
+        logger.info('TASK_SUBMITTED', `Task ${taskId} submitted to queue (Impact: ${task.predictedImpact})`, {
             taskId,
             domainLabel: task.domainLabel,
-            priority: task.priority || 1
+            priority: task.priority || 1,
+            predictedImpact: task.predictedImpact
         });
 
         return taskId;
@@ -286,19 +296,27 @@ class CoreEngine {
                 failedAgents: []
             };
 
+            // Calculate predicted impact for subtasks
+            subtask.predictedImpact = this.metaReflection.predictImpact(subtask);
+
             this.taskQueue.push(subtask);
             parentTask.subtasks.push(subtaskId);
 
-            logger.info('SUBTASK_CREATED', `Subtask ${subtaskId} created for parent ${parentTaskId}`, {
+            logger.info('SUBTASK_CREATED', `Subtask ${subtaskId} created for parent ${parentTaskId} (Impact: ${subtask.predictedImpact})`, {
                 subtaskId,
                 parentTaskId,
                 dependencies: subtask.dependencies,
-                domainLabel: subtask.domainLabel
+                domainLabel: subtask.domainLabel,
+                predictedImpact: subtask.predictedImpact
             });
         }
 
-        // Re-sort queue to maintain priority after adding subtasks
-        this.taskQueue.sort((a, b) => (b.priority || 1) - (a.priority || 1));
+        // Re-sort queue: Priority first, then Predicted Impact
+        this.taskQueue.sort((a, b) => {
+            const priorityDiff = (b.priority || 1) - (a.priority || 1);
+            if (priorityDiff !== 0) return priorityDiff;
+            return (b.predictedImpact || 0) - (a.predictedImpact || 0);
+        });
 
         return parentTask.subtasks;
     }
@@ -387,10 +405,11 @@ class CoreEngine {
                 // Simulate processing...
                 const endTime = Date.now();
 
+                // Mocked "Actual" results
                 resolve({
                     resultData: `Task "${task.description}" executed successfully.`,
                     confidenceScore: parseFloat((Math.random() * (0.99 - 0.7) + 0.7).toFixed(2)),
-                    predictedImpact: parseFloat((Math.random() * (10 - 4) + 4).toFixed(1)),
+                    actualImpact: parseFloat((task.predictedImpact * (Math.random() * (1.2 - 0.8) + 0.8)).toFixed(1)),
                     executionTime: (endTime - startTime) + 150 // Mocked duration
                 });
             }, 500);
@@ -478,6 +497,7 @@ class CoreEngine {
      */
     logOutput(taskId, agentId, output) {
         const timestamp = new Date().toISOString();
+        const task = this.taskQueue.find(t => t.id === taskId);
 
         this.taskOutputs[taskId] = {
             taskId,
@@ -485,16 +505,16 @@ class CoreEngine {
             timestamp,
             resultData: output.resultData,
             confidenceScore: output.confidenceScore,
-            predictedImpact: output.predictedImpact,
+            predictedImpact: task ? task.predictedImpact : 0,
+            actualImpact: output.actualImpact || 0,
             executionTime: output.executionTime
         };
 
-        const task = this.taskQueue.find(t => t.id === taskId);
         if (task) {
             task.status = 'completed';
             if (this.agents[agentId]) {
                 this.agents[agentId].status = 'idle';
-                this.updateAgentPerformance(agentId, true, output.predictedImpact, task.domainLabel);
+                this.updateAgentPerformance(agentId, true, output.actualImpact || 0, task.domainLabel);
             }
 
             // If this was a subtask, notify the parent and check for aggregation
@@ -615,6 +635,7 @@ class CoreEngine {
                 resultData: aggregatedData,
                 confidenceScore: parseFloat((subtaskResults.reduce((acc, r) => acc + r.confidenceScore, 0) / subtaskResults.length).toFixed(2)),
                 predictedImpact: parseFloat((subtaskResults.reduce((acc, r) => acc + (r.predictedImpact || 0), 0) / subtaskResults.length).toFixed(1)),
+                actualImpact: parseFloat((subtaskResults.reduce((acc, r) => acc + (r.actualImpact || 0), 0) / subtaskResults.length).toFixed(1)),
                 executionTime: subtaskResults.reduce((acc, r) => acc + (r.executionTime || 0), 0)
             };
 
