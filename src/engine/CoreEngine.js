@@ -2,6 +2,7 @@ import logger from '../logger/Logger.js';
 import { v4 as uuidv4 } from 'uuid';
 import { validateTask } from './TaskValidator.js';
 import { validateAgent } from './AgentValidator.js';
+import MetaReflectionModule from './MetaReflectionModule.js';
 
 /**
  * Lightweight Orchestration Core (LOC) Engine
@@ -43,6 +44,12 @@ class CoreEngine {
          * Reference to the execution loop timer
          */
         this.executionTimer = null;
+
+        /**
+         * Meta-Reflection Module for performance tracking and strategy suggestions
+         * @type {MetaReflectionModule}
+         */
+        this.metaReflection = new MetaReflectionModule(this);
 
         logger.info('ENGINE_INIT', 'Core Engine initialized successfully');
     }
@@ -184,18 +191,42 @@ class CoreEngine {
 
         if (!nextTask) return;
 
-        // Ensure we don't pick an agent that already failed/rejected this task
-        const agentId = this.findBestAgentForTask(nextTask, nextTask.failedAgents || []);
+        const { agentId, predictedSuccess } = this.metaReflection.evaluateAssignment(nextTask, nextTask.failedAgents || []);
         if (!agentId) return;
+
+        // Meta-Reflection Check: Before assigning, check predicted success probability
+        if (predictedSuccess < this.metaReflection.threshold) {
+            const strategy = this.metaReflection.suggestRemediation(nextTask, predictedSuccess);
+
+            logger.warn('LOW_PREDICTED_SUCCESS', `Task ${nextTask.id} has low predicted success (${predictedSuccess}). Applying strategy: ${strategy}`, {
+                taskId: nextTask.id,
+                agentId,
+                strategy
+            });
+
+            if (strategy === 'SPLIT') {
+                this.handleTaskSplitting(nextTask);
+                return;
+            } else if (strategy === 'COLLABORATE') {
+                this.handleTaskCollaboration(nextTask);
+                // Proceed with collaboration flag
+            } else if (strategy === 'REROUTE') {
+                // Return to queue, effectively waiting for a more suitable agent or state
+                logger.info('TASK_REROUTED', `Task ${nextTask.id} rerouted/delayed for better agent compatibility`);
+                return;
+            }
+        }
 
         // Transition task to processing state
         nextTask.status = 'processing';
         nextTask.assignedTo = agentId;
+        nextTask.predictedSuccess = predictedSuccess;
         this.agents[agentId].status = 'busy';
 
-        logger.info('TASK_DISPATCHED', `Dispatching task ${nextTask.id} to agent ${agentId}`, {
+        logger.info('TASK_DISPATCHED', `Dispatching task ${nextTask.id} to agent ${agentId} (Prob: ${predictedSuccess})`, {
             taskId: nextTask.id,
-            agentId
+            agentId,
+            predictedSuccess
         });
 
         try {
@@ -270,6 +301,45 @@ class CoreEngine {
         this.taskQueue.sort((a, b) => (b.priority || 1) - (a.priority || 1));
 
         return parentTask.subtasks;
+    }
+
+    /**
+     * Splits a task into smaller subtasks as a meta-reflection strategy.
+     * @param {Object} task 
+     */
+    handleTaskSplitting(task) {
+        logger.info('META_REFLECTION_STRATEGY', `Splitting task ${task.id} due to low success probability`, { taskId: task.id });
+
+        const subtaskSpecs = [
+            {
+                description: `Subtask 1: Initial phase of ${task.description}`,
+                domainLabel: task.domainLabel,
+                complexityScore: Math.ceil(task.complexityScore / 2),
+                priority: (task.priority || 1) + 1
+            },
+            {
+                description: `Subtask 2: Conclusion of ${task.description}`,
+                domainLabel: task.domainLabel,
+                complexityScore: Math.floor(task.complexityScore / 2),
+                priority: task.priority,
+                dependencies: [] // Created dynamically below correctly? No, decomposeTask handles it
+            }
+        ];
+
+        this.decomposeTask(task.id, subtaskSpecs);
+    }
+
+    /**
+     * Flags a task for collaboration as a meta-reflection strategy.
+     * @param {Object} task 
+     */
+    handleTaskCollaboration(task) {
+        logger.info('META_REFLECTION_STRATEGY', `Tagging task ${task.id} for agent collaboration`, { taskId: task.id });
+        task.isCollaborative = true;
+        task.priority = Math.min((task.priority || 1) + 2, 10); // Increase priority for collaborative efforts
+
+        // In this core, we signal collaboration by adding a metadata flag that the agent can read
+        task.suggestedAction = 'USE_COLLABORATION_PROTOCOL';
     }
 
     /**
@@ -424,7 +494,7 @@ class CoreEngine {
             task.status = 'completed';
             if (this.agents[agentId]) {
                 this.agents[agentId].status = 'idle';
-                this.updateAgentPerformance(agentId, true, output.predictedImpact);
+                this.updateAgentPerformance(agentId, true, output.predictedImpact, task.domainLabel);
             }
 
             // If this was a subtask, notify the parent and check for aggregation
@@ -569,7 +639,7 @@ class CoreEngine {
 
         if (this.agents[agentId]) {
             this.agents[agentId].status = 'idle';
-            this.updateAgentPerformance(agentId, false);
+            this.updateAgentPerformance(agentId, false, 0, task.domainLabel);
         }
 
         task.retryCount += 1;
@@ -589,7 +659,7 @@ class CoreEngine {
     /**
      * Update agent performance metrics
      */
-    updateAgentPerformance(agentId, success, impact = 0) {
+    updateAgentPerformance(agentId, success, impact = 0, domain = null) {
         const agent = this.agents[agentId];
         const perf = agent.performanceData;
 
@@ -603,6 +673,11 @@ class CoreEngine {
         }
 
         perf.lastActive = new Date().toISOString();
+
+        // Meta-Reflection Module update for domain-specific metrics
+        if (domain) {
+            this.metaReflection.updateAgentMetadata(agentId, domain, success, impact);
+        }
     }
 }
 
