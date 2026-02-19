@@ -10,5 +10,6 @@ export const VALID_DOMAINS = [
     'creative-writing',
     'optimization',
     'translation',
-    'summarization'
+    'summarization',
+    'data-science'
 ];

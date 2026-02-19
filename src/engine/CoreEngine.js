@@ -494,8 +494,9 @@ class CoreEngine {
      * @param {string} taskId 
      * @param {string} agentId 
      * @param {Object} output 
+     * @param {Object} collaborationMetadata Optional collaboration details
      */
-    logOutput(taskId, agentId, output) {
+    logOutput(taskId, agentId, output, collaborationMetadata = null) {
         const timestamp = new Date().toISOString();
         const task = this.taskQueue.find(t => t.id === taskId);
 
@@ -516,6 +517,23 @@ class CoreEngine {
                 this.agents[agentId].status = 'idle';
                 this.updateAgentPerformance(agentId, true, output.actualImpact || 0, task.domainLabel);
             }
+
+            // Enhanced Execution Logging
+            logger.execution({
+                taskId,
+                agentId,
+                domainLabel: task.domainLabel,
+                predictedImpact: task.predictedImpact,
+                actualImpact: output.actualImpact || 0,
+                confidenceScore: output.confidenceScore,
+                executionTime: output.executionTime,
+                dependencies: task.dependencies,
+                collaboration: collaborationMetadata || {
+                    isCollaborative: !!task.isCollaborative,
+                    parentTaskId: task.parentTaskId
+                },
+                status: 'completed'
+            });
 
             // If this was a subtask, notify the parent and check for aggregation
             if (task.parentTaskId) {
@@ -640,7 +658,11 @@ class CoreEngine {
             };
 
             // Log the parent task as completed with aggregated data
-            this.logOutput(parentTaskId, 'AGGREGATOR_SYSTEM', aggregatedResult);
+            this.logOutput(parentTaskId, 'AGGREGATOR_SYSTEM', aggregatedResult, {
+                type: 'AGGREGATION',
+                subtaskCount: subtasks.length,
+                subtaskIds: subtasks.map(s => s.id)
+            });
 
             logger.info('PARENT_TASK_FINALIZED', `Aggregated results for complex task ${parentTaskId}`, {
                 parentTaskId,
@@ -673,6 +695,25 @@ class CoreEngine {
             task.assignedTo = null;
         } else {
             task.status = 'failed';
+
+            // Record final failure in execution logs
+            logger.execution({
+                taskId: task.id,
+                agentId: agentId,
+                domainLabel: task.domainLabel,
+                predictedImpact: task.predictedImpact,
+                actualImpact: 0,
+                confidenceScore: 0,
+                executionTime: 0,
+                dependencies: task.dependencies,
+                collaboration: {
+                    isCollaborative: !!task.isCollaborative,
+                    parentTaskId: task.parentTaskId,
+                    retryCount: task.retryCount
+                },
+                status: 'failed'
+            });
+
             logger.error('TASK_ABORTED', `Task ${task.id} failed after maximum retries.`);
         }
     }
